@@ -11,15 +11,15 @@ except ImportError:
     import timezone
 
 class DatabaseOperations(BaseDatabaseOperations):
-    compiler_module = "sqlserver_ado.compiler"
-    
+    compiler_module = "sqlserver.ado.compiler"
+
     def cache_key_culling_sql(self):
         return """
             SELECT [cache_key]
               FROM (SELECT [cache_key], ROW_NUMBER() OVER (ORDER BY [cache_key]) AS [rank] FROM %s) AS [RankedCache]
              WHERE [rank] = %%s + 1
         """
-    
+
     def date_extract_sql(self, lookup_type, field_name):
         if lookup_type == 'week_day':
             lookup_type = 'weekday'
@@ -53,7 +53,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         """
         Fetch the last inserted ID by executing another query.
         """
-        # IDENT_CURRENT   returns the last identity value generated for a 
+        # IDENT_CURRENT   returns the last identity value generated for a
         #                 specific table in any session and any scope.
         # http://msdn.microsoft.com/en-us/library/ms175098.aspx
         cursor.execute("SELECT CAST(IDENT_CURRENT(%s) as bigint)", [self.quote_name(table_name)])
@@ -62,17 +62,17 @@ class DatabaseOperations(BaseDatabaseOperations):
     def return_insert_id(self):
         """
         MSSQL implements the RETURNING SQL standard extension differently from
-        the core database backends and this function is essentially a no-op. 
+        the core database backends and this function is essentially a no-op.
         The SQL is altered in the SQLInsertCompiler to add the necessary OUTPUT
         clause.
         """
         if django.VERSION[0] == 1 and django.VERSION[1] < 5:
-            # This gets around inflexibility of SQLInsertCompiler's need to 
+            # This gets around inflexibility of SQLInsertCompiler's need to
             # append an SQL fragment at the end of the insert query, which also must
             # expect the full quoted table and column name.
             return ('/* %s */', '')
-        
-        # Django #19096 - As of Django 1.5, can return None, None to bypass the 
+
+        # Django #19096 - As of Django 1.5, can return None, None to bypass the
         # core's SQL mangling.
         return (None, None)
 
@@ -112,14 +112,14 @@ class DatabaseOperations(BaseDatabaseOperations):
 
         The `style` argument is a Style object as returned by either
         color_style() or no_style() in django.core.management.color.
-        
+
         Originally taken from django-pyodbc project.
         """
         if not tables:
             return list()
-            
+
         qn = self.quote_name
-            
+
         # Cannot use TRUNCATE on tables that are referenced by a FOREIGN KEY; use DELETE instead.
         # (which is slow)
         from django.db import connection
@@ -142,7 +142,7 @@ class DatabaseOperations(BaseDatabaseOperations):
 
         cursor.execute("SELECT TABLE_NAME, CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE IN ('CHECK', 'FOREIGN KEY')")
         fks = cursor.fetchall()
-        
+
         sql_list = list()
 
         # Turn off constraints.
@@ -151,8 +151,8 @@ class DatabaseOperations(BaseDatabaseOperations):
 
         # Delete data from tables.
         sql_list.extend(['%s %s %s;' % (
-            style.SQL_KEYWORD('DELETE'), 
-            style.SQL_KEYWORD('FROM'), 
+            style.SQL_KEYWORD('DELETE'),
+            style.SQL_KEYWORD('FROM'),
             style.SQL_FIELD(qn(t))
             ) for t in tables])
 
@@ -175,11 +175,11 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def tablespace_sql(self, tablespace, inline=False):
         return "ON %s" % self.quote_name(tablespace)
-        
+
     def value_to_db_datetime(self, value):
         if value is None:
             return None
-            
+
         if timezone.is_aware(value):
             if getattr(settings, 'USE_TZ', False):
                 value = value.astimezone(timezone.utc).replace(tzinfo=None)
@@ -190,7 +190,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         if self.is_sql2005():
            value = value.replace(microsecond=0)
         return value
-    
+
     def value_to_db_time(self, value):
         if not self.is_sql2005():
             return value
@@ -202,7 +202,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         #...but it also doesn't really suport bare times
         if value is None:
             return None
-        
+
         return value.replace(microsecond=0)
 
     def value_to_db_decimal(self, value, max_digits, decimal_places):
@@ -236,8 +236,8 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def _supports_stddev(self):
         """
-        Work around for django ticket #18334. 
-        This backend supports StdDev and the SQLCompilers will remap to 
+        Work around for django ticket #18334.
+        This backend supports StdDev and the SQLCompilers will remap to
         the correct function names.
         """
         return True
@@ -246,7 +246,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         """
         Backends can implement as needed to enable inserts in to
         the identity column.
-        
+
         Should return True if identity inserts have been enabled.
         """
         if table:
@@ -257,12 +257,12 @@ class DatabaseOperations(BaseDatabaseOperations):
             ))
             return True
         return False
-    
+
     def disable_identity_insert(self, table):
         """
         Backends can implement as needed to disable inserts in to
         the identity column.
-        
+
         Should return True if identity inserts have been disabled.
         """
         if table:
