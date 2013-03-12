@@ -9,13 +9,13 @@ DATABASE_HOST = os.environ['COMPUTERNAME'] + '\\' + os.environ.get('SQLINSTANCE'
 DATABASE_USER = ''
 DATABASE_PASSWORD = ''
 DATABASE_COMMAND_TIMEOUT = 30
-DATABASE_ENGINE = 'sqlserver_ado'
+DATABASE_ENGINE = 'sqlserver.ado'
 
 # django required database settings
 DATABASES = {
     'default': {
         'NAME': DATABASE_NAME,
-        'ENGINE': 'sqlserver_ado',
+        'ENGINE': 'sqlserver.ado',
         'HOST': DATABASE_HOST,
         'USER': DATABASE_USER,
         'PASSWORD': DATABASE_PASSWORD,
@@ -32,7 +32,7 @@ DATABASES = {
 # not directly.
 def _hack_backend_path():
 	import os, sys
-	backend_path = os.path.join(os.path.abspath(os.path.dirname(".")), "../../source")
+	backend_path = os.path.join(os.path.abspath(os.path.dirname(".")), "../..")
 	sys.path.append(backend_path)
 
 _hack_backend_path()
@@ -41,15 +41,15 @@ _hack_backend_path()
 def make_connection_string():
     # This function duplicates the Django connection string logic, but is meant
     # to be used by non-Django tests that want to share test db settings.
-    
+
     settings = DATABASES.get('default', {})
-    
+
     db_host = settings.get('HOST', '127.0.0.1')
     db_port = settings.get('PORT', '')
     db_name = settings.get('NAME', '')
     db_user = settings.get('USER', '')
     db_pass = settings.get('PASSWORD', '')
-    
+
     if db_name == '':
         raise Exception("You need to specify a DATABASE_NAME in your Django settings file.")
 

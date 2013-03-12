@@ -3,6 +3,7 @@
 # be interpolated against the values of Field.__dict__.
 from django.conf import settings
 from django.db.backends.creation import BaseDatabaseCreation, TEST_DATABASE_PREFIX
+from django.db.utils import load_backend
 import sys
 
 class DatabaseCreation(BaseDatabaseCreation):
@@ -36,20 +37,19 @@ class DatabaseCreation(BaseDatabaseCreation):
         """
         Create a transactionless connection to 'master' database.
         """
-        from base import DatabaseWrapper
-        
-        master_settings = self.connection.settings_dict
+        master_settings = self.connection.settings_dict.copy()
         if not master_settings['TEST_NAME']:
             master_settings['TEST_NAME'] = 'test_' + master_settings['NAME']
         master_settings['NAME'] = 'master'
-        return DatabaseWrapper(master_settings, use_transactions=False)
+        backend = load_backend(master_settings['ENGINE'])
+        return backend.DatabaseWrapper(master_settings, use_transactions=False)
 
     def _create_test_db(self, verbosity=1, autoclobber=False):
         """
         Create the test databases using a connection to database 'master'.
         """
         test_database_name = self._test_database_name(settings)
-        
+
         if not self._test_database_create(settings):
             if verbosity >= 1:
                 print "Skipping Test DB creation"
@@ -61,21 +61,21 @@ class DatabaseCreation(BaseDatabaseCreation):
 
         # connect to master database
         self.connection = self._create_master_connection()
-        
+
         try:
             super(DatabaseCreation, self)._create_test_db(verbosity, autoclobber)
         finally:
-            # set thing back 
+            # set thing back
             self.connection = old_wrapper
 
         return test_database_name
-        
+
 
     def _destroy_test_db(self, test_database_name, verbosity=1):
         """
         Drop the test databases using a connection to database 'master'.
         """
-    
+
         if not self._test_database_create(settings):
             if verbosity >= 1:
                 print "Skipping Test DB destruction"
@@ -84,13 +84,13 @@ class DatabaseCreation(BaseDatabaseCreation):
         old_wrapper = self.connection
         old_wrapper.close()
         self.connection = self._create_master_connection()
-        
+
         try:
             super(DatabaseCreation, self)._destroy_test_db(test_database_name, verbosity)
         finally:
             self.connection = old_wrapper
-            
-        
+
+
     def _test_database_create(self, settings):
         """
         Check the settings to see if the test database should be created.

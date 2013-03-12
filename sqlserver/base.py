@@ -2,7 +2,6 @@
 from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseValidation, BaseDatabaseClient
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 
-from introspection import DatabaseIntrospection
 from creation import DatabaseCreation
 from operations import DatabaseOperations
 
@@ -153,7 +152,6 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
 
         self.client = BaseDatabaseClient(self)
         self.creation = DatabaseCreation(self)
-        self.introspection = DatabaseIntrospection(self)
         self.validation = BaseDatabaseValidation(self)
 
         try:

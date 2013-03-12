@@ -21,6 +21,10 @@ IntegrityError = Database.IntegrityError
 
 class DatabaseWrapper(SqlServerBaseWrapper):
 
+    def __init__(self, *args, **kwargs):
+        super(DatabaseWrapper, self).__init__(*args, **kwargs)
+        self.introspection = DatabaseIntrospection(self)
+
     def __connect(self):
         """Connect to the database"""
         self.connection = Database.connect(
