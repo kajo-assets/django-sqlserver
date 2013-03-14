@@ -9,13 +9,18 @@ DATABASE_HOST = os.environ['COMPUTERNAME'] + '\\' + os.environ.get('SQLINSTANCE'
 DATABASE_USER = ''
 DATABASE_PASSWORD = ''
 DATABASE_COMMAND_TIMEOUT = 30
-DATABASE_ENGINE = 'sqlserver.ado'
+DATABASE_ENGINE = 'sqlserver.' + os.environ.get('BACKEND', 'ado')
+
+try:
+    from local_settings import *
+except:
+    pass
 
 # django required database settings
 DATABASES = {
     'default': {
         'NAME': DATABASE_NAME,
-        'ENGINE': 'sqlserver.ado',
+        'ENGINE': DATABASE_ENGINE,
         'HOST': DATABASE_HOST,
         'USER': DATABASE_USER,
         'PASSWORD': DATABASE_PASSWORD,
@@ -23,6 +28,7 @@ DATABASES = {
         'OPTIONS' : {
             'provider': 'SQLNCLI10',
             'extra_params': 'DataTypeCompatibility=80;MARS Connection=True;',
+            'autocommit': True,
         },
     }
 }
