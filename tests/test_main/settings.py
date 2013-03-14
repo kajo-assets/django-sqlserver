@@ -1,6 +1,7 @@
 # Django settings for testbackend project.
+import sys
 def hack_path():
-	import os, sys
+	import os
 	common_path = os.path.join(os.path.abspath(os.path.dirname(".")), "..")
 	sys.path.append(common_path)
 	
@@ -24,7 +25,7 @@ MANAGERS = ADMINS
 # although not all choices may be available on all operating systems.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/New York'
+TIME_ZONE = 'America/New_York'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -75,9 +76,11 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'apitest',
     'regressiontests',
     'slicing',
     'nulls',
     'aggregates',
 )
+
+if sys.platform.startswith("win"):
+    INSTALLED_APPS += ('apitest',)

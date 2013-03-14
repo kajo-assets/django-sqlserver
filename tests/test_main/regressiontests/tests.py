@@ -1,7 +1,9 @@
+import sys
 import datetime
 import decimal
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models, connection
+from django.utils import unittest
 from django.test import TestCase
 
 from regressiontests.models import Bug69Table1, Bug69Table2, Bug70Table, Bug93Table, IntegerIdTable
@@ -103,6 +105,7 @@ class Bug70TestCase(TestCase):
         self.assertTrue(hasattr(results[0], 'id'))
         self.assertTrue(results[0].id == 1)
 
+@unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
 class Bug85TestCase(TestCase):
     def testEuropeanDecimalConversion(self):
         from sqlserver.ado.dbapi import _cvtDecimal
@@ -169,9 +172,10 @@ class BasicFunctionalityTestCase(TestCase):
         for x in xrange(1,5):
             IntegerIdTable.objects.create(id=x)
 
-        objs = IntegerIdTable.objects.raw("SELECT [id] FROM [regressiontests_IntegerIdTable]")
+        objs = IntegerIdTable.objects.raw("SELECT [id] FROM [regressiontests_integeridtable]")
         self.assertEquals(len(list(objs)), 4)
 
+@unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
 class ConnectionStringTestCase(TestCase):
     def assertInString(self, conn_string, pattern):
         """
