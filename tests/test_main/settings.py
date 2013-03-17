@@ -2,8 +2,9 @@
 import sys
 def hack_path():
 	import os
-	common_path = os.path.join(os.path.abspath(os.path.dirname(".")), "..")
+	common_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "..")
 	sys.path.append(common_path)
+	sys.path.append(os.path.join(common_path, 'tests'))
 	
 hack_path()
 from dbsettings import *
