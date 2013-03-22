@@ -6,7 +6,11 @@ try:
     from django.utils.timezone import utc
 except:
     pass
-import pytds as Database
+
+try:
+    import pytds as Database
+except ImportError:
+    raise Exception('pytds is not available, run pip install python-tds to fix this')
 
 from sqlserver.base import (
     SqlServerBaseWrapper,

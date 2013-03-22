@@ -112,7 +112,7 @@ def find_package_data(
 
 setup(
     name="django-mssql",
-    version=find_version("sqlserver_ado", "__init__.py"),
+    version=find_version("sqlserver", "__init__.py"),
     url='https://bitbucket.org/Manfre/django-mssql',
     license='MIT',
     description="Django backend database support for MS SQL 2005 and up.",

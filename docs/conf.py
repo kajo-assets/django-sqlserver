@@ -50,7 +50,7 @@ copyright = u'2012, Django MSSQL authors'
 # built documents.
 #
 try:
-    from sqlserver_ado import __version__
+    from sqlserver import __version__
     # The short X.Y version.
     version = '.'.join(__version__.split('.')[:2])
     # The full version, including alpha/beta/rc tags.
