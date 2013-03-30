@@ -274,4 +274,3 @@ class DatabaseOperations(BaseDatabaseOperations):
             ))
             return True
         return False
-

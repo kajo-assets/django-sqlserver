@@ -17,6 +17,7 @@ from sqlserver.base import (
     )
 
 from .introspection import DatabaseIntrospection
+from .operations import DatabaseOperations
 
 class DatabaseWrapper(SqlServerBaseWrapper):
     def __init__(self, *args, **kwargs):
