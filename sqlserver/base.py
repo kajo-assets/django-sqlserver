@@ -96,7 +96,9 @@ def make_connection_string(settings):
         auth_string
     ]
 
-    options = settings.OPTIONS
+    options = getattr(settings, 'OPTIONS')
+    if not options:
+        options = {}
 
     if not options.get('provider', None):
         options['provider'] = 'sqlncli10'
