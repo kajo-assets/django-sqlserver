@@ -28,7 +28,6 @@ DATABASES = {
         'OPTIONS' : {
             'provider': 'SQLNCLI10',
             'extra_params': 'DataTypeCompatibility=80;MARS Connection=True;',
-            'autocommit': True,
         },
     }
 }

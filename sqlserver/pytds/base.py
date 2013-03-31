@@ -32,13 +32,16 @@ class DatabaseWrapper(SqlServerBaseWrapper):
         if self.connection is None:
             """Connect to the database"""
             options = self.settings_dict.get('OPTIONS', {})
+            autocommit=options.get('autocommit', False),
+            if not self.use_transactions:
+                autocommit = True
             self.connection = Database.connect(
                 server=self.settings_dict['HOST'],
                 database=self.settings_dict['NAME'],
                 user=self.settings_dict['USER'],
                 password=self.settings_dict['PASSWORD'],
                 timeout=self.command_timeout,
-                autocommit=options.get('autocommit', False),
+                autocommit=autocommit,
                 use_mars=options.get('use_mars', False),
                 load_balancer=options.get('load_balancer', None),
                 use_tz=utc if settings.USE_TZ else None,
