@@ -59,14 +59,14 @@ class Bet(models.Model):
     
     >>> p = Player.objects.annotate(Count('bet'), avg_bet=Avg('bet__amount')).order_by('name')
     
-    >>> p[0].name
+    >>> unicode(p[0].name)
     u'Adam Vandenberg'
     >>> p[0].bet__count
     5
     >>> p[0].avg_bet
     300
     
-    >>> p[1].name
+    >>> unicode(p[1].name)
     u'Joe Betsalot'
     >>> p[1].bet__count
     5
