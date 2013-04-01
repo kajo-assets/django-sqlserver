@@ -59,6 +59,11 @@ class DatabaseOperations(BaseDatabaseOperations):
         cursor.execute("SELECT CAST(IDENT_CURRENT(%s) as bigint)", [self.quote_name(table_name)])
         return cursor.fetchone()[0]
 
+    def lookup_cast(self, lookup_type):
+        if lookup_type in ('iexact', 'icontains', 'istartswith', 'iendswith'):
+            return "UPPER(%s)"
+        return "%s"
+
     def return_insert_id(self):
         """
         MSSQL implements the RETURNING SQL standard extension differently from

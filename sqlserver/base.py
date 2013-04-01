@@ -122,17 +122,17 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
 
     operators = {
         "exact": "= %s",
-        "iexact": "LIKE %s ESCAPE '\\'",
+        "iexact": "LIKE UPPER(%s) ESCAPE '\\'",
         "contains": "LIKE %s ESCAPE '\\'",
-        "icontains": "LIKE %s ESCAPE '\\'",
+        "icontains": "LIKE UPPER(%s) ESCAPE '\\'",
         "gt": "> %s",
         "gte": ">= %s",
         "lt": "< %s",
         "lte": "<= %s",
         "startswith": "LIKE %s ESCAPE '\\'",
         "endswith": "LIKE %s ESCAPE '\\'",
-        "istartswith": "LIKE %s ESCAPE '\\'",
-        "iendswith": "LIKE %s ESCAPE '\\'",
+        "istartswith": "LIKE UPPER(%s) ESCAPE '\\'",
+        "iendswith": "LIKE UPPER(%s) ESCAPE '\\'",
     }
 
     def __init__(self, *args, **kwargs):
