@@ -101,10 +101,10 @@ from
 	sys.tables T
 	join sys.index_columns IC on IC.object_id = T.object_id
 	join sys.columns C on C.object_id = T.object_id and C.column_id = IC.column_id
-	join sys.indexes Ix on Ix.object_id = T.object_id and Ix.index_id = IC.index_id
+	join sys.indexes IX on IX.object_id = T.object_id and IX.index_id = IC.index_id
 where
 	T.name = %s
-	and (Ix.is_unique=1 or Ix.is_primary_key=1)
+	and (IX.is_unique=1 or IX.is_primary_key=1)
     -- Omit multi-column keys
 	and not exists (
 		select *
