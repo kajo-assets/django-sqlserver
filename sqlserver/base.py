@@ -24,6 +24,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     ignores_nulls_in_unique_constraints = False
     allows_group_by_pk = False
+    supports_microsecond_precision = False
 
 
 def is_ip_address(value):

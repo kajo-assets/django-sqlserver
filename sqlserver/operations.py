@@ -192,9 +192,8 @@ class DatabaseOperations(BaseDatabaseOperations):
                 raise ValueError("SQL Server backend does not support timezone-aware datetimes.")
 
         # SQL Server 2005 doesn't support microseconds
-        # I think this should be truncated in dbapi driver itself
-        #if self.is_sql2005():
-        #   value = value.replace(microsecond=0)
+        # TODO: to support microseconds we need to support new datetime types from SQL server 2008 first
+        value = value.replace(microsecond=0)
         return value
 
     def value_to_db_time(self, value):
