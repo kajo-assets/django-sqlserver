@@ -33,8 +33,8 @@ class BaseSqlDatabaseIntrospection(BaseDatabaseIntrospection):
         items = list()
         for column in columns:
             column = list(column) # Convert tuple to list
-            if identity_check and self._is_auto_field(cursor, table_name, column[0]):
-                column[1] = 'AUTO_FIELD_MARKER'
+            #if identity_check and self._is_auto_field(cursor, table_name, column[0]):
+            #    column[1] = 'AUTO_FIELD_MARKER'
             items.append(column)
         return items
 

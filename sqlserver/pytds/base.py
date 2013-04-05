@@ -20,6 +20,8 @@ from .introspection import DatabaseIntrospection
 from .operations import DatabaseOperations
 
 class DatabaseWrapper(SqlServerBaseWrapper):
+    Database = Database
+
     def __init__(self, *args, **kwargs):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
         self.introspection = DatabaseIntrospection(self)
@@ -30,26 +32,39 @@ class DatabaseWrapper(SqlServerBaseWrapper):
 
     def _cursor(self):
         if self.connection is None:
-            """Connect to the database"""
-            options = self.settings_dict.get('OPTIONS', {})
-            autocommit=options.get('autocommit', False),
-            if not self.use_transactions:
-                autocommit = True
-            self.connection = Database.connect(
-                server=self.settings_dict['HOST'],
-                database=self.settings_dict['NAME'],
-                user=self.settings_dict['USER'],
-                password=self.settings_dict['PASSWORD'],
-                timeout=self.command_timeout,
-                autocommit=autocommit,
-                use_mars=options.get('use_mars', False),
-                load_balancer=options.get('load_balancer', None),
-                use_tz=utc if settings.USE_TZ else None,
-            )
-            # The OUTPUT clause is supported in 2005+ sql servers
-            self.features.can_return_id_from_insert = self.connection.tds_version >= Database.TDS72
-            connection_created.send(sender=self.__class__, connection=self)
+            self.connection = self.get_new_connection(self.settings_dict)
         return CursorWrapper(self.connection.cursor())
+
+    def _set_autocommit(self, autocommit):
+        self.connection.autocommit = autocommit
+
+    def get_connection_params(self):
+        return self.settings_dict
+
+    def get_new_connection(self, settings_dict):
+        """Connect to the database"""
+        options = settings_dict.get('OPTIONS', {})
+        autocommit=options.get('autocommit', False),
+        if not self.use_transactions:
+            autocommit = True
+        connection = Database.connect(
+            server=settings_dict['HOST'],
+            database=settings_dict['NAME'],
+            user=settings_dict['USER'],
+            password=settings_dict['PASSWORD'],
+            timeout=self.command_timeout,
+            autocommit=autocommit,
+            use_mars=options.get('use_mars', False),
+            load_balancer=options.get('load_balancer', None),
+            use_tz=utc if settings.USE_TZ else None,
+        )
+        # The OUTPUT clause is supported in 2005+ sql servers
+        self.features.can_return_id_from_insert = connection.tds_version >= Database.TDS72
+        connection_created.send(sender=self.__class__, connection=self)
+        return connection
+
+    def init_connection_state(self):
+        pass
 
 
 class CursorWrapper(object):

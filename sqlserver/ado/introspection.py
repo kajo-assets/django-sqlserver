@@ -1,5 +1,5 @@
 from ..introspection import BaseSqlDatabaseIntrospection
-import ado_consts
+#import ado_consts
 
 class DatabaseIntrospection(BaseSqlDatabaseIntrospection):
     def get_table_description(self, cursor, table_name, identity_check=True):
@@ -18,7 +18,7 @@ class DatabaseIntrospection(BaseSqlDatabaseIntrospection):
         items = list()
         for column in columns:
             column = list(column) # Convert tuple to list
-            if identity_check and self._is_auto_field(cursor, table_name, column[0]):
-                column[1] = ado_consts.AUTO_FIELD_MARKER
+            #if identity_check and self._is_auto_field(cursor, table_name, column[0]):
+            #    column[1] = ado_consts.AUTO_FIELD_MARKER
             items.append(column)
         return items

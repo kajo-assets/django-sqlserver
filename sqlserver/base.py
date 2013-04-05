@@ -23,6 +23,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_tablespaces = True
 
     ignores_nulls_in_unique_constraints = False
+    allows_group_by_pk = False
 
 
 def is_ip_address(value):

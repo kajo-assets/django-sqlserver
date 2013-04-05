@@ -104,7 +104,7 @@ adVarWChar                    = 0xCA
 adVariant                     = 0xC
 adWChar                       = 0x82
 # Additional constants used by introspection but not ADO itself
-AUTO_FIELD_MARKER = -1000
+#AUTO_FIELD_MARKER = -1000
 
 adTypeNames = {
     adBSTR: 'adBSTR',
