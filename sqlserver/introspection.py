@@ -28,7 +28,7 @@ class BaseSqlDatabaseIntrospection(BaseDatabaseIntrospection):
         of SQL_AUTOFIELD, which maps to the 'AutoField' value in the DATA_TYPES_REVERSE dict.
         """
         cursor.execute("SELECT * FROM [%s] where 1=0" % (table_name))
-        columns = cursor.native_description
+        columns = cursor.description
 
         items = list()
         for column in columns:
