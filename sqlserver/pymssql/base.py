@@ -17,7 +17,7 @@ from sqlserver.base import (
     )
 
 from .introspection import DatabaseIntrospection
-from .operations import DatabaseOperations
+from ..operations import DatabaseOperations
 
 VERSION_SQL2000 = 8
 VERSION_SQL2005 = 9

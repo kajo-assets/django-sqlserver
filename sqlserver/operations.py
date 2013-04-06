@@ -197,7 +197,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         return value
 
     def value_to_db_time(self, value):
-        if not self.is_sql2005():
+        if self.connection._is_sql2008_and_up(self.connection.connection):
             return value
 
         if timezone.is_aware(value):

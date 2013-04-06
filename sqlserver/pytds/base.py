@@ -16,7 +16,7 @@ from sqlserver.base import (
     )
 
 from .introspection import DatabaseIntrospection
-from .operations import DatabaseOperations
+from ..operations import DatabaseOperations
 
 class DatabaseWrapper(SqlServerBaseWrapper):
     Database = Database
