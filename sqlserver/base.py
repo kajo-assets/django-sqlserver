@@ -1,6 +1,7 @@
 """Microsoft SQL Server database backend for Django."""
 from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseValidation, BaseDatabaseClient
 from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.db.backends.signals import connection_created
 
 from creation import DatabaseCreation
 from operations import DatabaseOperations
@@ -173,6 +174,24 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         self.ops.is_sql2005 = self.is_sql2005
         self.ops.is_sql2008 = self.is_sql2008
 
+    def get_connection_params(self):
+        return self.settings_dict
+
+    def get_new_connection(self, settings_dict):
+        """Connect to the database"""
+        conn = self._get_new_connection(settings_dict)
+        # The OUTPUT clause is supported in 2005+ sql servers
+        self.features.can_return_id_from_insert = self._is_sql2005_and_up(conn)
+        self.features.has_bulk_insert = self._is_sql2008_and_up(conn)
+        connection_created.send(sender=self.__class__, connection=self)
+        return conn
+
+    def _get_new_connection(self, settings_dict):
+        raise NotImplementedError
+
+    def init_connection_state(self):
+        pass
+
     def __connect(self):
         """Connect to the database"""
         raise NotImplementedError
@@ -203,6 +222,12 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         if not self.connection:
             self.__connect()
         return self.connection.is_sql2008
+
+    def _is_sql2005_and_up(self, conn):
+        raise NotImplementedError
+
+    def _is_sql2008_and_up(self, conn):
+        raise NotImplementedError
 
     def _cursor(self):
         raise NotImplementedError

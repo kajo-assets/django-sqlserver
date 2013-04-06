@@ -1,7 +1,6 @@
 import sys
 from django.conf import settings
 from django.db import utils
-from django.db.backends.signals import connection_created
 try:
     from django.utils.timezone import utc
 except:
@@ -38,16 +37,13 @@ class DatabaseWrapper(SqlServerBaseWrapper):
     def _set_autocommit(self, autocommit):
         self.connection.autocommit = autocommit
 
-    def get_connection_params(self):
-        return self.settings_dict
-
-    def get_new_connection(self, settings_dict):
+    def _get_new_connection(self, settings_dict):
         """Connect to the database"""
         options = settings_dict.get('OPTIONS', {})
-        autocommit=options.get('autocommit', False),
+        autocommit = options.get('autocommit', False)
         if not self.use_transactions:
             autocommit = True
-        connection = Database.connect(
+        return Database.connect(
             server=settings_dict['HOST'],
             database=settings_dict['NAME'],
             user=settings_dict['USER'],
@@ -58,13 +54,12 @@ class DatabaseWrapper(SqlServerBaseWrapper):
             load_balancer=options.get('load_balancer', None),
             use_tz=utc if settings.USE_TZ else None,
         )
-        # The OUTPUT clause is supported in 2005+ sql servers
-        self.features.can_return_id_from_insert = connection.tds_version >= Database.TDS72
-        connection_created.send(sender=self.__class__, connection=self)
-        return connection
 
-    def init_connection_state(self):
-        pass
+    def _is_sql2005_and_up(self, conn):
+        return conn.tds_version >= Database.TDS72
+
+    def _is_sql2008_and_up(self, conn):
+        return conn.tds_version >= Database.TDS73
 
 
 class CursorWrapper(object):

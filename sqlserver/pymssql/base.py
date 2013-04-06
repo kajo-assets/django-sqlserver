@@ -32,29 +32,40 @@ class DatabaseWrapper(SqlServerBaseWrapper):
         except TypeError:
             self.ops = DatabaseOperations(self)
 
+    def _set_autocommit(self, autocommit):
+        self.connection.autocommit(autocommit)
+
+    def _get_new_connection(self, settings_dict):
+        conn = Database.connect(
+            host=settings_dict['HOST'],
+            database=settings_dict['NAME'],
+            user=settings_dict['USER'],
+            password=settings_dict['PASSWORD'],
+            timeout=self.command_timeout,
+        )
+        conn.autocommit(not self.use_transactions)
+        return conn
+
     def _cursor(self):
         if self.connection is None:
             """Connect to the database"""
-            options = self.settings_dict.get('OPTIONS', {})
-            self.connection = Database.connect(
-                host=self.settings_dict['HOST'],
-                database=self.settings_dict['NAME'],
-                user=self.settings_dict['USER'],
-                password=self.settings_dict['PASSWORD'],
-                timeout=self.command_timeout,
-            )
-            # The OUTPUT clause is supported in 2005+ sql servers
-            try:
-                cur = self.connection.cursor()
-                cur.execute("SELECT SERVERPROPERTY('productversion')")
-                ver = cur.fetchone()[0]
-                major = int(ver.split('.')[0])
-            finally:
-                cur.close()
-            self.features.can_return_id_from_insert = major >= VERSION_SQL2005
-            self.connection.autocommit(not self.use_transactions)
-            connection_created.send(sender=self.__class__, connection=self)
+            self.connection = self.get_new_connection(self.settings_dict)
         return CursorWrapper(self.connection.cursor())
+
+    def _get_major_ver(self, conn):
+        cur = conn.cursor()
+        try:
+            cur.execute("SELECT SERVERPROPERTY('productversion')")
+            ver = cur.fetchone()[0]
+            return int(ver.split('.')[0])
+        finally:
+            cur.close()
+
+    def _is_sql2005_and_up(self, conn):
+        return self._get_major_ver(conn) >= 9
+
+    def _is_sql2008_and_up(self, conn):
+        return self._get_major_ver(conn) >= 10
 
 
 class CursorWrapper(object):
