@@ -33,7 +33,7 @@ class DatabaseWrapper(SqlServerBaseWrapper):
 
     def __connect(self):
         """Connect to the database"""
-        self.connection = self.get_new_connection()
+        self.connection = self.get_new_connection(self.settings_dict)
 
     def _cursor(self):
         if self.connection is None:
