@@ -7,7 +7,7 @@ except:
     pass
 
 try:
-    import pytds as Database
+    import pytds
 except ImportError:
     raise Exception('pytds is not available, run pip install python-tds to fix this')
 
@@ -19,7 +19,7 @@ from .introspection import DatabaseIntrospection
 from ..operations import DatabaseOperations
 
 class DatabaseWrapper(SqlServerBaseWrapper):
-    Database = Database
+    Database = pytds
 
     def __init__(self, *args, **kwargs):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
@@ -43,7 +43,7 @@ class DatabaseWrapper(SqlServerBaseWrapper):
         autocommit = options.get('autocommit', False)
         if not self.use_transactions:
             autocommit = True
-        return Database.connect(
+        return pytds.connect(
             server=settings_dict['HOST'],
             database=settings_dict['NAME'],
             user=settings_dict['USER'],
@@ -56,10 +56,10 @@ class DatabaseWrapper(SqlServerBaseWrapper):
         )
 
     def _is_sql2005_and_up(self, conn):
-        return conn.tds_version >= Database.TDS72
+        return conn.tds_version >= pytds.TDS72
 
     def _is_sql2008_and_up(self, conn):
-        return conn.tds_version >= Database.TDS73
+        return conn.tds_version >= pytds.TDS73
 
 
 class CursorWrapper(object):
@@ -75,15 +75,15 @@ class CursorWrapper(object):
     def execute(self, sql, params = ()):
         try:
             return self.cursor.execute(sql, params)
-        except Database.IntegrityError, e:
+        except pytds.IntegrityError, e:
             if not self.cursor.connection.mars_enabled:
                 self.cursor.cancel()
             raise utils.IntegrityError, utils.IntegrityError(*tuple(e)), sys.exc_info()[2]
-        except Database.DatabaseError, e:
+        except pytds.DatabaseError, e:
             if not self.cursor.connection.mars_enabled:
                 self.cursor.cancel()
             raise utils.DatabaseError, utils.DatabaseError(*tuple(e)), sys.exc_info()[2]
-        except Database.Error:
+        except pytds.Error:
             if not self.cursor.connection.mars_enabled:
                 self.cursor.cancel()
             raise
@@ -91,9 +91,9 @@ class CursorWrapper(object):
     def executemany(self, sql, params):
         try:
             return self.cursor.executemany(sql, params)
-        except Database.IntegrityError, e:
+        except pytds.IntegrityError, e:
             raise utils.IntegrityError, utils.IntegrityError(*tuple(e)), sys.exc_info()[2]
-        except Database.DatabaseError, e:
+        except pytds.DatabaseError, e:
             raise utils.DatabaseError, utils.DatabaseError(*tuple(e)), sys.exc_info()[2]
 
     def __getattr__(self, attr):

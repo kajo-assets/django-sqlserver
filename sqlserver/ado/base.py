@@ -1,18 +1,13 @@
 """Microsoft SQL Server database backend for Django."""
 
-import dbapi as Database
+from . import dbapi as Database
 
 from sqlserver.base import (
     SqlServerBaseWrapper,
-    DatabaseFeatures,
-    DatabaseCreation,
-    DatabaseOperations,
-    is_ip_address,
-    connection_string_from_settings,
     make_connection_string
 )
 
-from introspection import DatabaseIntrospection
+from .introspection import DatabaseIntrospection
 
 DatabaseError = Database.DatabaseError
 IntegrityError = Database.IntegrityError
