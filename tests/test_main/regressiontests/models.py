@@ -3,7 +3,7 @@ import decimal
 from django.db import models, IntegrityError
 from django.test import TestCase
 from django.core.paginator import Paginator
-from sqlserver.ado.fields import BigAutoField, BigIntegerField, BigForeignKey
+from sqlserver.fields import BigAutoField, BigIntegerField, BigForeignKey
 
 class Bug19Table(models.Model):
     """ A simple model for testing string comparisons.
