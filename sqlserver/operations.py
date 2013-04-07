@@ -11,7 +11,7 @@ except ImportError:
     import timezone
 
 class DatabaseOperations(BaseDatabaseOperations):
-    compiler_module = "sqlserver.ado.compiler"
+    compiler_module = "sqlserver.compiler"
 
     def cache_key_culling_sql(self):
         return """
