@@ -1,4 +1,5 @@
 """Microsoft SQL Server database backend for Django."""
+from django.db import utils
 from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseValidation, BaseDatabaseClient
 from django.db.backends.signals import connection_created
 
@@ -151,6 +152,7 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         else:
             cursor = self._cursor()
         cursor.execute('EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"')
+        cursor.close()
 
     def enable_constraint_checking(self):
         """
@@ -161,6 +163,7 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         else:
             cursor = self._cursor()
         cursor.execute('EXEC sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"')
+        cursor.close()
 
     def check_constraints(self, table_names=None):
         """
@@ -171,10 +174,12 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         else:
             cursor = self._cursor()
         if not table_names:
-            cursor.execute('DBCC CHECKCONSTRAINTS')
+            cursor.execute('DBCC CHECKCONSTRAINTS WITH ALL_CONSTRAINTS')
         else:
             qn = self.ops.quote_name
             for name in table_names:
-                cursor.execute('DBCC CHECKCONSTRAINTS({0})'.format(
+                cursor.execute('DBCC CHECKCONSTRAINTS({0}) WITH ALL_CONSTRAINTS'.format(
                     qn(name)
                 ))
+        if cursor.description:
+            raise utils.IntegrityError(cursor.fetchall())
