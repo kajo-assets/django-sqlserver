@@ -276,7 +276,8 @@ class ReturnIdOnInsertWithTriggersTestCase(TestCase):
         table_name = qn(model._meta.db_table)
         trigger_name = qn('test_trigger_%s' % model._meta.db_table)
 
-        with connection.cursor() as cur:
+        cur = connection.cursor()
+        try:
             # drop trigger if it exists
             drop_sql = """
 IF OBJECT_ID(N'[dbo].{trigger}') IS NOT NULL
@@ -292,6 +293,8 @@ AS UPDATE {tbl} set [a] = 100""".format(
 
             cur.execute(drop_sql)
             cur.execute(create_sql)
+        finally:
+            cur.close()
 
     def test_pk(self):
         self.create_trigger(PkPlusOne)
