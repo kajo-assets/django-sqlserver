@@ -127,8 +127,7 @@ class DatabaseOperations(BaseDatabaseOperations):
 
         # Cannot use TRUNCATE on tables that are referenced by a FOREIGN KEY; use DELETE instead.
         # (which is slow)
-        from django.db import connection
-        cursor = connection.cursor()
+        cursor = self.connection.cursor()
         # Try to minimize the risks of the braindeaded inconsistency in
         # DBCC CHEKIDENT(table, RESEED, n) behavior.
         seqs = []
