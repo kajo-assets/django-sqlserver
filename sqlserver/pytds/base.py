@@ -78,7 +78,7 @@ class CursorWrapper(object):
             if not self.cursor.connection.mars_enabled:
                 self.cursor.cancel()
             raise utils.DatabaseError, utils.DatabaseError(*tuple(e)), sys.exc_info()[2]
-        except pytds.Error:
+        except:
             if not self.cursor.connection.mars_enabled:
                 self.cursor.cancel()
             raise

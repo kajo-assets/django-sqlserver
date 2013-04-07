@@ -184,7 +184,7 @@ class SQLCompiler(compiler.SQLCompiler):
             inner_as=inner_table_name,
         )
         
-        sql = "SELECT _row_num, {outer} FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY {order}) as _row_num, {inner}) as QQQ where {where}".format(
+        sql = "SELECT {outer} FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY {order}) as _row_num, {inner}) as QQQ where {where}".format(
             outer=outer_fields,
             order=order,
             inner=inner_select,
