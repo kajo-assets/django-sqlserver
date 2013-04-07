@@ -97,9 +97,9 @@ class DatabaseOperations(BaseDatabaseOperations):
             )
 
     def quote_name(self, name):
-        if name.startswith('[') and name.endswith(']'):
+        if name.startswith('"') and name.endswith('"'):
             return name # already quoted
-        return '[%s]' % name
+        return '"%s"' % name
 
     def random_function_sql(self):
         return 'NEWID()'
