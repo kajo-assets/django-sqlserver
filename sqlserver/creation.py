@@ -32,6 +32,14 @@ class DatabaseCreation(BaseDatabaseCreation):
         'TextField':                    'nvarchar(max)',
         'TimeField':                    'datetime',
     }
+    _sql2008_data_types = {
+        'DateField': 'date',
+        'DateTimeField': 'datetime2(6)',
+        'TimeField': 'time(6)',
+        }
+
+    def _patch_for_sql2008_and_up(self):
+        self.data_types.update(self._sql2008_data_types)
 
     def _create_master_connection(self):
         """

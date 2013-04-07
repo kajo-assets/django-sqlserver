@@ -77,6 +77,7 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         except ValueError:
             self.cast_avg_to_float = False
 
+        self.ops.features = self.features
         self.ops.is_sql2000 = self.is_sql2000
         self.ops.is_sql2005 = self.is_sql2005
         self.ops.is_sql2008 = self.is_sql2008
@@ -90,6 +91,8 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         # The OUTPUT clause is supported in 2005+ sql servers
         self.features.can_return_id_from_insert = self._is_sql2005_and_up(conn)
         #self.features.has_bulk_insert = self._is_sql2008_and_up(conn)
+        self.features.supports_microsecond_precision = self._is_sql2008_and_up(conn)
+        self.creation._patch_for_sql2008_and_up()
         connection_created.send(sender=self.__class__, connection=self)
         return conn
 
