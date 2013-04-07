@@ -3,7 +3,7 @@ import ado_consts
 
 class DatabaseIntrospection(BaseSqlDatabaseIntrospection):
     data_types_reverse = {
-        ado_consts.AUTO_FIELD_MARKER: 'AutoField',
+        #ado_consts.AUTO_FIELD_MARKER: 'AutoField',
         ado_consts.adBoolean: 'BooleanField',
         ado_consts.adChar: 'CharField',
         ado_consts.adWChar: 'CharField',
