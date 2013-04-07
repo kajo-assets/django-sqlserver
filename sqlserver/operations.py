@@ -255,10 +255,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         Should return True if identity inserts have been enabled.
         """
         if table:
-            from django.db import connection
-            cursor = connection.cursor()
+            cursor = self.connection.cursor()
             cursor.execute('SET IDENTITY_INSERT {0} ON'.format(
-                connection.ops.quote_name(table)
+                self.connection.ops.quote_name(table)
             ))
             return True
         return False
@@ -271,10 +270,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         Should return True if identity inserts have been disabled.
         """
         if table:
-            from django.db import connection
-            cursor = connection.cursor()
+            cursor = self.connection.cursor()
             cursor.execute('SET IDENTITY_INSERT {0} OFF'.format(
-                connection.ops.quote_name(table)
+                self.connection.ops.quote_name(table)
             ))
             return True
         return False
