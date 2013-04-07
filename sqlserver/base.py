@@ -89,7 +89,7 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         conn = self._get_new_connection(settings_dict)
         # The OUTPUT clause is supported in 2005+ sql servers
         self.features.can_return_id_from_insert = self._is_sql2005_and_up(conn)
-        self.features.has_bulk_insert = self._is_sql2008_and_up(conn)
+        #self.features.has_bulk_insert = self._is_sql2008_and_up(conn)
         connection_created.send(sender=self.__class__, connection=self)
         return conn
 
