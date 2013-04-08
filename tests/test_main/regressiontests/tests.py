@@ -5,6 +5,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import models, connection
 from django.utils import unittest
 from django.test import TestCase
+from six.moves import xrange
 
 from regressiontests.models import Bug69Table1, Bug69Table2, Bug70Table, Bug93Table, IntegerIdTable
 
@@ -30,7 +31,7 @@ class Bug38TestCase(TestCase):
         Bug38Table(d=decimal.Decimal('0450.000')).save()
         Bug38Table(d=decimal.Decimal('4.5e+2')).save()
         Bug38Table(d=decimal.Decimal('4.5E+2')).save()
-        self.assertEquals(len(list(Bug38Table.objects.all())),13)
+        self.assertEqual(len(list(Bug38Table.objects.all())),13)
 
     def testReturnsDecimal(self):
         """
@@ -39,7 +40,7 @@ class Bug38TestCase(TestCase):
         """
         Bug38Table(d=decimal.Decimal('0')).save()
         d1 = Bug38Table.objects.all()[0]
-        self.assertEquals(decimal.Decimal, d1.d.__class__)
+        self.assertEqual(decimal.Decimal, d1.d.__class__)
 
     def testReturnsDecimalFromString(self):
         """
@@ -48,7 +49,7 @@ class Bug38TestCase(TestCase):
         """
         Bug38Table(d=u'123').save()
         d1 = Bug38Table.objects.all()[0]
-        self.assertEquals(decimal.Decimal, d1.d.__class__)
+        self.assertEqual(decimal.Decimal, d1.d.__class__)
 
     def testSavesAfterDecimal(self):
         """
@@ -57,7 +58,7 @@ class Bug38TestCase(TestCase):
         """
         Bug38Table(d=decimal.Decimal('450.1')).save()
         d1 = Bug38Table.objects.all()[0]
-        self.assertEquals(decimal.Decimal('450.1'), d1.d)
+        self.assertEqual(decimal.Decimal('450.1'), d1.d)
 
     def testInsertWithMoreDecimals(self):
         """
@@ -67,7 +68,7 @@ class Bug38TestCase(TestCase):
         """
         Bug38Table(d=decimal.Decimal('450.111')).save()
         d1 = Bug38Table.objects.all()[0]
-        self.assertEquals(decimal.Decimal('450.11'), d1.d)
+        self.assertEqual(decimal.Decimal('450.11'), d1.d)
 
     def testInsertWithLeadingZero(self):
         """
@@ -75,7 +76,7 @@ class Bug38TestCase(TestCase):
         """
         Bug38Table(d=decimal.Decimal('0450.0')).save()
         d1 = Bug38Table.objects.all()[0]
-        self.assertEquals(decimal.Decimal('450.0'), d1.d)
+        self.assertEqual(decimal.Decimal('450.0'), d1.d)
 
 
 class Bug69TestCase(TestCase):
@@ -100,7 +101,7 @@ class Bug70TestCase(TestCase):
 
         results = Bug70Table.objects.all()
 
-        self.assertEquals(results.count(), 3)
+        self.assertEqual(results.count(), 3)
 
         self.assertTrue(hasattr(results[0], 'id'))
         self.assertTrue(results[0].id == 1)
@@ -165,7 +166,7 @@ class BasicFunctionalityTestCase(TestCase):
         a = list(IntegerIdTable.objects.all().order_by('?'))
         b = list(IntegerIdTable.objects.all().order_by('?'))
 
-        self.assertNotEquals(a, b)
+        self.assertNotEqual(a, b)
 
     def testRawUsingRowNumber(self):
         """Issue 120: raw requests failing due to missing slicing logic"""
@@ -173,7 +174,7 @@ class BasicFunctionalityTestCase(TestCase):
             IntegerIdTable.objects.create(id=x)
 
         objs = IntegerIdTable.objects.raw("SELECT [id] FROM [regressiontests_integeridtable]")
-        self.assertEquals(len(list(objs)), 4)
+        self.assertEqual(len(list(objs)), 4)
 
 @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
 class ConnectionStringTestCase(TestCase):

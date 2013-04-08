@@ -86,9 +86,9 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def prep_for_like_query(self, x):
         """Prepares a value for use in a LIKE query."""
-        from django.utils.encoding import smart_unicode
+        from django.utils.encoding import smart_text
         return (
-            smart_unicode(x).\
+            smart_text(x).\
                 replace("\\", "\\\\").\
                 replace("%", "\%").\
                 replace("_", "\_").\

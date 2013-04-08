@@ -30,6 +30,7 @@ import sys
 import time
 import datetime
 import re
+import six
 
 try:
     import decimal
@@ -147,7 +148,7 @@ def connect(connection_string, timeout=30, use_transactions=None):
         else:
             useTransactions = use_transactions
         return Connection(c, useTransactions)
-    except Exception, e:
+    except Exception as e:
         raise OperationalError(e, "Error opening connection: " + connection_string)
 
 def _use_transactions(c):
@@ -273,7 +274,7 @@ class Connection(object):
         self.messages = []
         try:
             self._close_connection()
-        except Exception, e:
+        except Exception as e:
             self._raiseConnectionError(InternalError, e)
         self.adoConn = None
         pythoncom.CoUninitialize()
@@ -295,7 +296,7 @@ class Connection(object):
                 #calling CommitTrans automatically starts a new transaction. Not all providers support this.
                 #If not, we will have to start a new transaction by this command:
                 self.adoConn.BeginTrans()
-        except Exception, e:
+        except Exception as e:
             self._raiseConnectionError(Error, e)
 
     def rollback(self):
@@ -317,15 +318,15 @@ class Connection(object):
         return Cursor(self)
 
     def printADOerrors(self):
-        print 'ADO Errors (%i):' % self.adoConn.Errors.Count
+        six.print_('ADO Errors (%i):' % self.adoConn.Errors.Count)
         for e in self.adoConn.Errors:
-            print 'Description: %s' % e.Description
-            print 'Error: %s %s ' % (e.Number, adoErrors.get(e.Number, "unknown"))
+            six.print_('Description: %s' % e.Description)
+            six.print_('Error: %s %s ' % (e.Number, adoErrors.get(e.Number, "unknown")))
             if e.Number == ado_error_TIMEOUT:
-                print 'Timeout Error: Try using adodbpi.connect(constr,timeout=Nseconds)'
-            print 'Source: %s' % e.Source
-            print 'NativeError: %s' % e.NativeError
-            print 'SQL State: %s' % e.SQLState
+                six.print_('Timeout Error: Try using adodbpi.connect(constr,timeout=Nseconds)')
+            six.print_('Source: %s' % e.Source)
+            six.print_('NativeError: %s' % e.NativeError)
+            six.print_('SQL State: %s' % e.SQLState)
             
     def _suggest_error_class(self):
         """Introspect the current ADO Errors and determine an appropriate error class.
@@ -449,7 +450,7 @@ class Cursor(object):
             recordset = self.cmd.Execute()
             self.rowcount = recordset[1]
             self._description_from_recordset(recordset[0])
-        except Exception, e:
+        except Exception as e:
             _message = ""
             if hasattr(e, 'args'): _message += str(e.args)+"\n"
             _message += "Command:\n%s\nParameters:\n%s" %  (self.cmd.CommandText, format_parameters(self.cmd.Parameters, True))

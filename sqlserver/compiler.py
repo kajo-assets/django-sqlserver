@@ -1,6 +1,7 @@
 from django.db.models.sql import compiler
 import datetime
 import re
+from itertools import chain, repeat
 
 from contextlib import contextmanager
 
@@ -59,8 +60,8 @@ class SQLCompiler(compiler.SQLCompiler):
             row = row[1:]
        
         values = []
-        index_extra_select = len(self.query.extra_select.keys())
-        for value, field in map(None, row[index_extra_select:], fields):
+        index_extra_select = len(self.query.extra_select)
+        for value, field in zip(row[index_extra_select:], chain(fields, repeat(None))):
             if field:
                 if isinstance(value, datetime.datetime):
                     internal_type = field.get_internal_type()

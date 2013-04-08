@@ -18,7 +18,7 @@ class BigAutoField(AutoField):
         if value is None:
             return value
         try:
-            return long(value)
+            return int(value)
         except (TypeError, ValueError):
             raise ValidationError(
                 _("This value must be a long."))
@@ -26,7 +26,7 @@ class BigAutoField(AutoField):
     def get_db_prep_value(self, value, connection=None, prepared=False):
         if value is None:
             return None
-        return long(value)
+        return int(value)
 
 class BigForeignKey(ForeignKey):
     """A ForeignKey field that points to a BigAutoField or BigIntegerField"""

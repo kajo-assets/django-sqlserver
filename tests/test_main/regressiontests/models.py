@@ -203,8 +203,8 @@ class Bug37TestCase(TestCase):
         Bug37ATable(pk=1, a='a', b='b', c='c').save(force_insert=True)
         try:
             Bug37ATable(pk=1, a='a', b='b', c='c').save(force_insert=True)
-        except Exception, e:
-            self.failUnless(isinstance(e, IntegrityError), 'Expected IntegrityError but got: %s' % type(e))
+        except Exception as e:
+            self.assertTrue(isinstance(e, IntegrityError), 'Expected IntegrityError but got: %s' % type(e))
 
     def testDeleteRelatedRecordFails(self):
         a2 = Bug37ATable(a='a', b='b', c='c')
@@ -213,8 +213,8 @@ class Bug37TestCase(TestCase):
         Bug37BTable(d='d', a=a2).save()
         try:
             a2.delete()
-        except Exception, e:
-            self.failUnless(isinstance(e, IntegrityError), 'Expected IntegrityError but got: %s' % type(e))
+        except Exception as e:
+            self.assertTrue(isinstance(e, IntegrityError), 'Expected IntegrityError but got: %s' % type(e))
 
 class Bug38Table(models.Model):
     d = models.DecimalField(max_digits=5, decimal_places=2)
@@ -309,12 +309,12 @@ class Bug63Table(models.Model):
     """
     Test that the BigAutoField and BigIntegerField fields work.
 
-    >>> Bug63Table(number=2147483648L).save()
+    >>> Bug63Table(number=2147483648).save()
     >>> len(list(Bug63Table.objects.all()))
     1
-    >>> big = Bug63Table.objects.get(number=2147483648L)
+    >>> big = Bug63Table.objects.get(number=2147483648)
     >>> big.number
-    2147483648L
+    2147483648
     """
     id = BigAutoField(primary_key=True)
     number = BigIntegerField()
@@ -323,13 +323,13 @@ class Bug64Table(models.Model):
     """
     Test that a BigForeignKey works as intended.
 
-    >>> a = Bug63Table(number=2147483648L)
+    >>> a = Bug63Table(number=2147483648)
     >>> a.save()
     >>> b = Bug64Table(key=a)
     >>> b.save()
     >>> a == b.key
     True
-    >>> b.key.number == 2147483648L
+    >>> b.key.number == 2147483648
     True
     """
 

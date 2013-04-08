@@ -57,16 +57,17 @@ class Bet(models.Model):
     >>> Bet(player=p2, amount="4000.00").save()
     >>> Bet(player=p2, amount="5000.00").save()
     
-    >>> p = Player.objects.annotate(Count('bet'), avg_bet=Avg('bet__amount')).order_by('name')
+    >>> p = list(Player.objects.annotate(Count('bet'), avg_bet=Avg('bet__amount')).order_by('name'))
+    >>> import six
     
-    >>> unicode(p[0].name)
+    >>> six.text_type(p[0].name)
     u'Adam Vandenberg'
     >>> p[0].bet__count
     5
     >>> p[0].avg_bet
     300
     
-    >>> unicode(p[1].name)
+    >>> six.text_type(p[1].name)
     u'Joe Betsalot'
     >>> p[1].bet__count
     5

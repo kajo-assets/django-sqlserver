@@ -1,6 +1,7 @@
 import sys
 from django.conf import settings
 from django.db import utils
+import six
 try:
     from django.utils.timezone import utc
 except:
@@ -70,14 +71,14 @@ class CursorWrapper(object):
     def execute(self, sql, params = ()):
         try:
             return self.cursor.execute(sql, params)
-        except pytds.IntegrityError, e:
+        except pytds.IntegrityError as e:
             if not self.cursor.connection.mars_enabled:
                 self.cursor.cancel()
-            raise utils.IntegrityError, utils.IntegrityError(*tuple(e)), sys.exc_info()[2]
-        except pytds.DatabaseError, e:
+            six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
+        except pytds.DatabaseError as e:
             if not self.cursor.connection.mars_enabled:
                 self.cursor.cancel()
-            raise utils.DatabaseError, utils.DatabaseError(*tuple(e)), sys.exc_info()[2]
+            six.reraise(utils.DatabaseError, utils.DatabaseError(*tuple(e.args)), sys.exc_info()[2])
         except:
             if not self.cursor.connection.mars_enabled:
                 self.cursor.cancel()
@@ -86,10 +87,10 @@ class CursorWrapper(object):
     def executemany(self, sql, params):
         try:
             return self.cursor.executemany(sql, params)
-        except pytds.IntegrityError, e:
-            raise utils.IntegrityError, utils.IntegrityError(*tuple(e)), sys.exc_info()[2]
-        except pytds.DatabaseError, e:
-            raise utils.DatabaseError, utils.DatabaseError(*tuple(e)), sys.exc_info()[2]
+        except pytds.IntegrityError as e:
+            six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
+        except pytds.DatabaseError as e:
+            six.reraise(utils.DatabaseError, utils.DatabaseError(*tuple(e.args)), sys.exc_info()[2])
 
     def __getattr__(self, attr):
         if attr in self.__dict__:

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db.backends.creation import BaseDatabaseCreation, TEST_DATABASE_PREFIX
 from django.db.utils import load_backend
 import sys
+import  six
 
 class DatabaseCreation(BaseDatabaseCreation):
     data_types = {
@@ -60,7 +61,7 @@ class DatabaseCreation(BaseDatabaseCreation):
 
         if not self._test_database_create(settings):
             if verbosity >= 1:
-                print "Skipping Test DB creation"
+                six.print_("Skipping Test DB creation")
             return test_database_name
 
         # clear any existing connections to the database
@@ -86,7 +87,7 @@ class DatabaseCreation(BaseDatabaseCreation):
 
         if not self._test_database_create(settings):
             if verbosity >= 1:
-                print "Skipping Test DB destruction"
+                six.print_("Skipping Test DB destruction")
             return
 
         old_wrapper = self.connection
@@ -103,7 +104,7 @@ class DatabaseCreation(BaseDatabaseCreation):
         """
         Check the settings to see if the test database should be created.
         """
-        if self.connection.settings_dict.has_key('TEST_CREATE'):
+        if 'TEST_CREATE' in self.connection.settings_dict:
             return self.connection.settings_dict.get('TEST_CREATE', True)
         if hasattr(settings, 'TEST_DATABASE_CREATE'):
             return settings.TEST_DATABASE_CREATE

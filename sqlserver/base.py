@@ -3,8 +3,8 @@ from django.db import utils
 from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseValidation, BaseDatabaseClient
 from django.db.backends.signals import connection_created
 
-from creation import DatabaseCreation
-from operations import DatabaseOperations
+from .creation import DatabaseCreation
+from .operations import DatabaseOperations
 
 
 class DatabaseFeatures(BaseDatabaseFeatures):

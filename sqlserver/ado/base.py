@@ -1,6 +1,7 @@
 import sys
 from django.db import utils
 from django.core.exceptions import ImproperlyConfigured, ValidationError
+import six
 from . import dbapi as Database
 adodb = Database
 
@@ -44,7 +45,7 @@ def make_connection_string(settings):
             d = self._dict
             result = None
             if hasattr(d, "get"):
-                if d.has_key(name):
+                if name in d:
                     result = d.get(name)
                 else:
                     result = d.get('DATABASE_' + name)
@@ -149,20 +150,18 @@ class CursorWrapper(object):
     def execute(self, sql, params = ()):
         try:
             return self.cursor.execute(sql, params)
-        except adodb.IntegrityError, e:
-            raise utils.IntegrityError, utils.IntegrityError(*tuple(e)), sys.exc_info()[2]
-        except adodb.DatabaseError, e:
-            raise utils.DatabaseError, utils.DatabaseError(*tuple(e)), sys.exc_info()[2]
-        except adodb.Error:
-            raise
+        except adodb.IntegrityError as e:
+            six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
+        except adodb.DatabaseError as e:
+            six.reraise(utils.DatabaseError, utils.DatabaseError(*tuple(e.args)), sys.exc_info()[2])
 
     def executemany(self, sql, params):
         try:
             return self.cursor.executemany(sql, params)
-        except adodb.IntegrityError, e:
-            raise utils.IntegrityError, utils.IntegrityError(*tuple(e)), sys.exc_info()[2]
-        except adodb.DatabaseError, e:
-            raise utils.DatabaseError, utils.DatabaseError(*tuple(e)), sys.exc_info()[2]
+        except adodb.IntegrityError as e:
+            six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
+        except adodb.DatabaseError as e:
+            six.reraise(utils.DatabaseError, utils.DatabaseError(*tuple(e.args)), sys.exc_info()[2])
 
     def __getattr__(self, attr):
         if attr in self.__dict__:
