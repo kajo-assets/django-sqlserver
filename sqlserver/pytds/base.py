@@ -37,8 +37,6 @@ class DatabaseWrapper(SqlServerBaseWrapper):
         """Connect to the database"""
         options = settings_dict.get('OPTIONS', {})
         autocommit = options.get('autocommit', False)
-        if not self.use_transactions:
-            autocommit = True
         return pytds.connect(
             server=settings_dict['HOST'],
             database=settings_dict['NAME'],
@@ -50,6 +48,14 @@ class DatabaseWrapper(SqlServerBaseWrapper):
             load_balancer=options.get('load_balancer', None),
             use_tz=utc if settings.USE_TZ else None,
         )
+
+    def _enter_transaction_management(self, managed):
+        if self.features.uses_autocommit and managed:
+            self.connection.autocommit = False
+
+    def _leave_transaction_management(self, managed):
+        if self.features.uses_autocommit and not managed:
+            self.connection.autocommit = True
 
     def _is_sql2005_and_up(self, conn):
         return conn.tds_version >= pytds.TDS72

@@ -47,8 +47,6 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
     }
 
     def __init__(self, *args, **kwargs):
-        self.use_transactions = kwargs.pop('use_transactions', None)
-
         super(SqlServerBaseWrapper, self).__init__(*args, **kwargs)
 
         try:
@@ -57,6 +55,9 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         except TypeError:
             # django >= 1.3
             self.features = DatabaseFeatures(self)
+
+        autocommit = self.settings_dict["OPTIONS"].get("autocommit", False)
+        self.features.uses_autocommit = autocommit
 
         try:
             self.ops = DatabaseOperations()

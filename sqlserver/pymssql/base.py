@@ -37,6 +37,8 @@ class DatabaseWrapper(SqlServerBaseWrapper):
         self.connection.autocommit(autocommit)
 
     def _get_new_connection(self, settings_dict):
+        options = settings_dict.get('OPTIONS', {})
+        autocommit = options.get('autocommit', False)
         conn = Database.connect(
             host=settings_dict['HOST'],
             database=settings_dict['NAME'],
@@ -44,8 +46,16 @@ class DatabaseWrapper(SqlServerBaseWrapper):
             password=settings_dict['PASSWORD'],
             timeout=self.command_timeout,
         )
-        conn.autocommit(not self.use_transactions)
+        conn.autocommit(autocommit)
         return conn
+
+    def _enter_transaction_management(self, managed):
+        if self.features.uses_autocommit and managed:
+            self.connection.autocommit(False)
+
+    def _leave_transaction_management(self, managed):
+        if self.features.uses_autocommit and not managed:
+            self.connection.autocommit(True)
 
     def _cursor(self):
         if self.connection is None:

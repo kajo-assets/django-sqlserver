@@ -115,10 +115,12 @@ class DatabaseWrapper(SqlServerBaseWrapper):
         self.introspection = DatabaseIntrospection(self)
 
     def _get_new_connection(self, settings_dict):
+        options = settings_dict.get('OPTIONS', {})
+        autocommit = options.get('autocommit', False)
         return Database.connect(
             make_connection_string(settings_dict),
             self.command_timeout,
-            use_transactions=self.use_transactions,
+            use_transactions=not autocommit,
         )
 
     def __connect(self):

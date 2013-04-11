@@ -50,8 +50,10 @@ class DatabaseCreation(BaseDatabaseCreation):
         if not master_settings['TEST_NAME']:
             master_settings['TEST_NAME'] = 'test_' + master_settings['NAME']
         master_settings['NAME'] = 'master'
+        master_settings['OPTIONS'] = master_settings['OPTIONS'].copy()
+        master_settings['OPTIONS']['autocommit'] = True
         backend = load_backend(master_settings['ENGINE'])
-        return backend.DatabaseWrapper(master_settings, use_transactions=False)
+        return backend.DatabaseWrapper(master_settings)
 
     def _create_test_db(self, verbosity=1, autoclobber=False):
         """
