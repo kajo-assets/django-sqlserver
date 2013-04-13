@@ -92,7 +92,7 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         conn = self._get_new_connection(settings_dict)
         # The OUTPUT clause is supported in 2005+ sql servers
         self.features.can_return_id_from_insert = self._is_sql2005_and_up(conn)
-        #self.features.has_bulk_insert = self._is_sql2008_and_up(conn)
+        self.features.has_bulk_insert = self._is_sql2008_and_up(conn)
         self.features.supports_microsecond_precision = self._is_sql2008_and_up(conn)
         self.features.ignores_nulls_in_unique_constraints = self._is_sql2008_and_up(conn)
         self.creation._patch_for_sql2008_and_up()
