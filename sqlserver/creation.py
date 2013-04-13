@@ -127,3 +127,23 @@ class DatabaseCreation(BaseDatabaseCreation):
             else:
                 name = TEST_DATABASE_PREFIX + settings.DATABASE_NAME
         return name
+
+    def sql_create_model(self, model, style, known_models=set()):
+        opts = model._meta
+        fix_fields = []
+        queries = []
+        for f in opts.local_fields:
+            if f.unique and f.null:
+                sql = style.SQL_KEYWORD('CREATE UNIQUE INDEX') +\
+                    ' [idx_{table}_{column}] ' + style.SQL_KEYWORD('ON') +\
+                    ' [{table}]([{column}]) ' + style.SQL_KEYWORD('WHERE') +\
+                    ' [{column}] ' + style.SQL_KEYWORD('IS NOT NULL')
+                queries.append(sql.format(table=opts.db_table,
+                                          column=f.column))
+                fix_fields.append(f)
+                f._unique = False
+        list_of_sql, pending_references_dict = super(DatabaseCreation, self).sql_create_model(model, style, known_models)
+        for f in fix_fields:
+            f._unique = True
+        list_of_sql.extend(queries)
+        return list_of_sql, pending_references_dict
