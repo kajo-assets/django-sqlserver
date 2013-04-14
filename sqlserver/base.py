@@ -95,6 +95,8 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         self.features.has_bulk_insert = self._is_sql2008_and_up(conn)
         self.features.supports_microsecond_precision = self._is_sql2008_and_up(conn)
         self.features.ignores_nulls_in_unique_constraints = self._is_sql2008_and_up(conn)
+        if self._is_sql2008_and_up(conn):
+            self.creation.sql_create_model = self.creation.sql_create_model_sql2008
         self.creation._patch_for_sql2008_and_up()
         connection_created.send(sender=self.__class__, connection=self)
         return conn
