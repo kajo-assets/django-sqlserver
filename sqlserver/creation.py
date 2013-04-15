@@ -75,11 +75,36 @@ class DatabaseCreation(BaseDatabaseCreation):
 
         try:
             super(DatabaseCreation, self)._create_test_db(verbosity, autoclobber)
+            self.install_regex(test_database_name)
         finally:
             # set thing back
             self.connection = old_wrapper
 
         return test_database_name
+
+
+    def install_regex(self, test_database_name):
+        import os
+        import binascii
+        with open(os.path.join(os.path.dirname(__file__), 'regex_clr.dll'), 'rb') as f:
+            assembly = binascii.hexlify(f.read())
+        sql = 'CREATE ASSEMBLY regex_clr FROM 0x{}'.format(assembly)
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute('USE [{}]'.format(test_database_name))
+            cursor.execute(sql)
+            cursor.execute('''
+            create function REGEXP_LIKE
+            (
+                @input nvarchar(4000),
+                @pattern nvarchar(4000),
+                @caseSensitive int
+            ) 
+            RETURNS INT  AS 
+            EXTERNAL NAME regex_clr.UserDefinedFunctions.REGEXP_LIKE
+            ''')
+        finally:
+            cursor.close()
 
 
     def _destroy_test_db(self, test_database_name, verbosity=1):
