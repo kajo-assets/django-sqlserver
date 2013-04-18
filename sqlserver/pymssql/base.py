@@ -18,7 +18,6 @@ from sqlserver.base import (
     )
 
 from .introspection import DatabaseIntrospection
-from ..operations import DatabaseOperations
 
 VERSION_SQL2000 = 8
 VERSION_SQL2005 = 9
@@ -28,10 +27,6 @@ class DatabaseWrapper(SqlServerBaseWrapper):
     def __init__(self, *args, **kwargs):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
         self.introspection = DatabaseIntrospection(self)
-        try:
-            self.ops = DatabaseOperations()
-        except TypeError:
-            self.ops = DatabaseOperations(self)
 
     def _set_autocommit(self, autocommit):
         self.connection.autocommit(autocommit)
