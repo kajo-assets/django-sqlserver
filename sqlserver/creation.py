@@ -87,8 +87,8 @@ class DatabaseCreation(BaseDatabaseCreation):
         import os
         import binascii
         with open(os.path.join(os.path.dirname(__file__), 'regex_clr.dll'), 'rb') as f:
-            assembly = binascii.hexlify(f.read())
-        sql = 'CREATE ASSEMBLY regex_clr FROM 0x{}'.format(assembly)
+            assembly = binascii.hexlify(f.read()).decode('ascii')
+        sql = 'CREATE ASSEMBLY regex_clr FROM 0x' + assembly
         cursor = self.connection.cursor()
         try:
             cursor.execute('USE [{}]'.format(test_database_name))
