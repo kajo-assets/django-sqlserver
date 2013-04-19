@@ -90,7 +90,7 @@ class CursorWrapper(object):
         try:
             if isinstance(params, list):
                 params = tuple(params)
-            return self.cursor.execute(sql, params)
+            return self.cursor.execute(str(sql), params)
         except Database.IntegrityError as e:
             six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
         except Database.DatabaseError as e:
@@ -98,7 +98,7 @@ class CursorWrapper(object):
 
     def executemany(self, sql, params):
         try:
-            return self.cursor.executemany(sql, params)
+            return self.cursor.executemany(str(sql), params)
         except Database.IntegrityError as e:
             six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
         except Database.DatabaseError as e:
