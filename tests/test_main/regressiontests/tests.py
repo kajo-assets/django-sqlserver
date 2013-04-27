@@ -141,18 +141,18 @@ class Bug93TestCase(TestCase):
 
     def testDateYear(self):
         dates = Bug93Table.objects.filter(d__year=2009)
-        self.assertTrue(dates.count() == 3)
+        self.assertEqual(dates.count(), 3)
 
         dates = Bug93Table.objects.filter(d__year='2010')
-        self.assertTrue(dates.count() == 2)
+        self.assertEqual(dates.count(), 2)
 
 
     def testDateTimeYear(self):
         dates = Bug93Table.objects.filter(dt__year=2009)
-        self.assertTrue(dates.count() == 3)
+        self.assertEqual(dates.count(), 3)
 
         dates = Bug93Table.objects.filter(dt__year='2010')
-        self.assertTrue(dates.count() == 2)
+        self.assertEqual(dates.count(), 2)
 
 class BasicFunctionalityTestCase(TestCase):
     def testRandomOrder(self):
