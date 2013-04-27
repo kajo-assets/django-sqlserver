@@ -226,7 +226,10 @@ class DatabaseOperations(BaseDatabaseOperations):
         `value` is an int, containing the looked-up year.
         """
         first = datetime.datetime(value, 1, 1)
-        second = datetime.datetime(value, 12, 31, 23, 59, 59, 999999)
+        if self.features.supports_microsecond_precision:
+            second = datetime.datetime(value, 12, 31, 23, 59, 59, 999999)
+        else:
+            second = datetime.datetime(value, 12, 31, 23, 59, 59, 997)
         return [first, second]
 
     def bulk_insert_sql(self, fields, num_values):

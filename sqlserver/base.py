@@ -93,11 +93,13 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         # The OUTPUT clause is supported in 2005+ sql servers
         self.features.can_return_id_from_insert = self._is_sql2005_and_up(conn)
         self.features.has_bulk_insert = self._is_sql2008_and_up(conn)
-        self.features.supports_microsecond_precision = self._is_sql2008_and_up(conn)
+        if not type(self).__module__.startswith('sqlserver.pymssql.'):
+            # pymssql doesn't support new sql server date types
+            self.features.supports_microsecond_precision = self._is_sql2008_and_up(conn)
+            self.creation._patch_for_sql2008_and_up()
         self.features.ignores_nulls_in_unique_constraints = self._is_sql2008_and_up(conn)
         if self._is_sql2008_and_up(conn):
             self.creation.sql_create_model = self.creation.sql_create_model_sql2008
-        self.creation._patch_for_sql2008_and_up()
         connection_created.send(sender=self.__class__, connection=self)
         return conn
 

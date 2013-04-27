@@ -40,6 +40,7 @@ class DatabaseWrapper(SqlServerBaseWrapper):
             user=settings_dict['USER'],
             password=settings_dict['PASSWORD'],
             timeout=self.command_timeout,
+            charset='utf8',
         )
         conn.autocommit(autocommit)
         return conn
