@@ -78,6 +78,7 @@ class DatabaseCreation(BaseDatabaseCreation):
             self.install_regex(test_database_name)
         finally:
             # set thing back
+            self.connection.close()
             self.connection = old_wrapper
 
         return test_database_name
