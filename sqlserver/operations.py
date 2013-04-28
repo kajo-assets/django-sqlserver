@@ -232,6 +232,14 @@ class DatabaseOperations(BaseDatabaseOperations):
             second = datetime.datetime(value, 12, 31, 23, 59, 59, 997)
         return [first, second]
 
+    def bulk_batch_size(self, fields, objs):
+        """
+        Returns the maximum allowed batch size for the backend. The fields
+        are the fields going to be inserted in the batch, the objs contains
+        all the objects to be inserted.
+        """
+        return min(len(objs), 1000)
+
     def bulk_insert_sql(self, fields, num_values):
         """
         Format the SQL for bulk insert
