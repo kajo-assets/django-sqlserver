@@ -26,6 +26,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     ignores_nulls_in_unique_constraints = False
     allows_group_by_pk = False
     supports_microsecond_precision = False
+    supports_subqueries_in_group_by = False
 
 
 class SqlServerBaseWrapper(BaseDatabaseWrapper):
