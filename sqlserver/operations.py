@@ -41,7 +41,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         seconds = ((timedelta.days * 86400) + timedelta.seconds) * sign
         out = sql
         if seconds:
-            out = u'DATEADD(SECOND, {0}, {1})'.format(seconds, sql)
+            out = u'DATEADD(SECOND, {0}, CAST({1} as datetime))'.format(seconds, sql)
         if timedelta.microseconds:
             # DATEADD with datetime doesn't support ms, must cast up
             out = u'DATEADD(MICROSECOND, {ms}, CAST({sql} as datetime2))'.format(
