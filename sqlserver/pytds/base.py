@@ -46,7 +46,7 @@ class DatabaseWrapper(SqlServerBaseWrapper):
             autocommit=autocommit,
             use_mars=options.get('use_mars', False),
             load_balancer=options.get('load_balancer', None),
-            use_tz=utc if settings.USE_TZ else None,
+            use_tz=utc if getattr(settings, 'USE_TZ', False) else None,
         )
 
     def _enter_transaction_management(self, managed):
