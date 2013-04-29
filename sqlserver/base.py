@@ -27,6 +27,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     allows_group_by_pk = False
     supports_microsecond_precision = False
     supports_subqueries_in_group_by = False
+    allow_sliced_subqueries = False
 
 
 class SqlServerBaseWrapper(BaseDatabaseWrapper):
