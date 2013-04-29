@@ -78,16 +78,10 @@ class CursorWrapper(object):
         try:
             return self.cursor.execute(sql, params)
         except pytds.IntegrityError as e:
-            if not self.cursor.connection.mars_enabled:
-                self.cursor.cancel()
             six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
         except pytds.DatabaseError as e:
-            if not self.cursor.connection.mars_enabled:
-                self.cursor.cancel()
             six.reraise(utils.DatabaseError, utils.DatabaseError(*tuple(e.args)), sys.exc_info()[2])
         except:
-            if not self.cursor.connection.mars_enabled:
-                self.cursor.cancel()
             raise
 
     def executemany(self, sql, params):
