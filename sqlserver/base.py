@@ -63,6 +63,7 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
 
         try:
             self.ops = DatabaseOperations()
+            self.ops.connection = self
         except TypeError:
             self.ops = DatabaseOperations(self)
 
