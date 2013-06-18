@@ -184,7 +184,7 @@ class DatabaseCreation(BaseDatabaseCreation):
             sql = sql.format(
                 index_name=qn(index_name),
                 table=style.SQL_TABLE(qn(opts.db_table)),
-                columns_csep=','.join(style.SQL_COLUMN(qn(opts.get_field(f).column))
+                columns_csep=','.join(qn(opts.get_field(f).column)
                                       for f in field_constraints),
                 )
             if predicate_parts:
