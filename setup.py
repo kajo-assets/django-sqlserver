@@ -122,7 +122,7 @@ setup(
     packages=find_packages(),
     package_data=find_package_data(),
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Framework :: Django',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
