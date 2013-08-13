@@ -150,6 +150,7 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
             cursor = self._cursor()
         cursor.execute('EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"')
         cursor.close()
+        return True
 
     def enable_constraint_checking(self):
         """
