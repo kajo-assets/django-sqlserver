@@ -51,22 +51,10 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
     def __init__(self, *args, **kwargs):
         super(SqlServerBaseWrapper, self).__init__(*args, **kwargs)
 
-        try:
-            # django < 1.3
-            self.features = DatabaseFeatures()
-        except TypeError:
-            # django >= 1.3
-            self.features = DatabaseFeatures(self)
-
+        self.features = DatabaseFeatures(self)
         autocommit = self.settings_dict["OPTIONS"].get("autocommit", False)
         self.features.uses_autocommit = autocommit
-
-        try:
-            self.ops = DatabaseOperations()
-            self.ops.connection = self
-        except TypeError:
-            self.ops = DatabaseOperations(self)
-
+        self.ops = DatabaseOperations(self)
         self.client = BaseDatabaseClient(self)
         self.creation = DatabaseCreation(self)
         self.validation = BaseDatabaseValidation(self)

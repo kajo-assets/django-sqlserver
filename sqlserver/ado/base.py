@@ -17,12 +17,8 @@ def is_ip_address(value):
     """
     Returns True if value is a valid IP address, otherwise False.
     """
-    try:
-        # IPv6 added with Django 1.4
-        from django.core.validators import validate_ipv46_address as ip_validator
-    except ImportError:
-        # Fallback to only IPv4 for older Django
-        from django.core.validators import validate_ipv4_address as ip_validator
+    # IPv6 added with Django 1.4
+    from django.core.validators import validate_ipv46_address as ip_validator
 
     try:
         ip_validator(value)
