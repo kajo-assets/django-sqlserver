@@ -8,11 +8,7 @@ try:
 except:
     from django.utils.encoding import smart_unicode as smart_text
 
-try:
-    from django.utils import timezone
-except ImportError:
-    # timezone added in Django 1.4, use provided partial backport
-    import timezone
+from django.utils import timezone
 
 class DatabaseOperations(BaseDatabaseOperations):
     compiler_module = "sqlserver.compiler"
