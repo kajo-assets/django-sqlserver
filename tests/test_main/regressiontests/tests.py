@@ -6,6 +6,7 @@ from django.db import models, connection
 from django.utils import unittest
 from django.test import TestCase
 from django.utils.safestring import mark_safe
+import six
 from six.moves import xrange
 
 from regressiontests.models import Bug69Table1, Bug69Table2, Bug70Table, Bug93Table, IntegerIdTable, StringTable
@@ -353,4 +354,4 @@ class SafeStringTestCase(TestCase):
     def test_unicode(self):
         obj = StringTable(name=mark_safe(u'string'))
         obj.save()
-        self.assertEqual(unicode(obj.name), unicode(StringTable.objects.get(pk=obj.id).name))
+        self.assertEqual(six.text_type(obj.name), six.text_type(StringTable.objects.get(pk=obj.id).name))
