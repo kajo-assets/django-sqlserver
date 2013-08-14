@@ -9,7 +9,7 @@ DATABASE_HOST = os.environ['COMPUTERNAME'] + '\\' + os.environ.get('SQLINSTANCE'
 DATABASE_USER = ''
 DATABASE_PASSWORD = ''
 DATABASE_COMMAND_TIMEOUT = 30
-DATABASE_ENGINE = 'sqlserver.' + os.environ.get('BACKEND', 'ado')
+DATABASE_ENGINE = os.environ.get('BACKEND', 'sqlserver.ado')
 
 try:
     from local_settings import *
