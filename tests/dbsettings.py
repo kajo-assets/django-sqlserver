@@ -6,8 +6,8 @@ import os
 # use old style settings for non-django dbapi tests
 DATABASE_NAME = os.environ.get('DATABASE_NAME', 'django_test_backend')
 DATABASE_HOST = os.environ['COMPUTERNAME'] + '\\' + os.environ.get('SQLINSTANCE', '')
-DATABASE_USER = ''
-DATABASE_PASSWORD = ''
+DATABASE_USER = os.environ.get('SQLUSER', '')
+DATABASE_PASSWORD = os.environ.get('SQLPASSWORD', '')
 DATABASE_COMMAND_TIMEOUT = 30
 DATABASE_ENGINE = os.environ.get('BACKEND', 'sqlserver.ado')
 
