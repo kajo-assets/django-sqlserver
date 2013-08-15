@@ -16,6 +16,6 @@ DATABASE_PASSWORD = '$SQLPASSWORD'
 EOF
 export COMPUTERNAME=$HOST
 python tests/test_main/manage.py test --noinput
-python tests/test_regex_compare/manage.py test --noinput
-python tests/test_inspectdb/manage.py test --noinput
-python tests/test_stardardapps/manage.py test --noinput
+#python tests/test_regex_compare/manage.py test --noinput
+#python tests/test_inspectdb/manage.py test --noinput
+#python tests/test_stardardapps/manage.py test --noinput
