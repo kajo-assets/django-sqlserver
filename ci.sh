@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
-virtualenv --no-site-packages env
+$PYTHONHOME/bin/virtualenv --no-site-packages env
 . env/bin/activate
-pip install django==$DJANGO_VER --use-mirrors
+python env/bin/pip install django==$DJANGO_VER --use-mirrors
 
 if [ $BACKEND = sqlserver.pytds ]; then
     pip install -e git+git://github.com/denisenkom/pytds.git#egg=pytds
