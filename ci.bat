@@ -8,13 +8,13 @@ if not exist env\src\django call git clone https://github.com/django/django.git 
 pushd env\src\django
 call git pull
 popd
-python env\scripts\pip install -e env/src/django
+env\scripts\pip install -e env/src/django
 
 if not exist pytds call git clone https://github.com/denisenkom/pytds.git
 pushd pytds
 call git pull
 popd
-python env\scripts\pip install -e ./pytds
+env\scripts\pip install -e ./pytds
 
 set COMPUTERNAME=%HOST%
 python tests\test_main\manage.py test --noinput
