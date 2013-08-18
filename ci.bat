@@ -4,7 +4,7 @@ call env\scripts\activate.bat
 
 set django_branch=stable/%DJANGO_VER%.x
 
-if not exist env\src\django call git clone https://github.com/django/django.git -b %django_branch% env/src/django
+if not exist env\src\django call git clone https://github.com/denisenkom/django.git -b %django_branch% env/src/django
 pushd env\src\django
 call git pull
 popd

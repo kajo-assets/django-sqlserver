@@ -7,7 +7,7 @@ $PYTHONHOME/bin/virtualenv --no-site-packages env
 django_branch=stable/${DJANGO_VER}.x
 
 if [ ! -d env/src/django ]; then
-    git clone https://github.com/django/django.git -b $django_branch env/src/django
+    git clone https://github.com/denisenkom/django.git -b $django_branch env/src/django
 fi
 pushd env/src/django
 git pull
