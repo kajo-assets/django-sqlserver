@@ -1,0 +1,71 @@
+Testing
+=======
+
+All tests are contained in the ``tests`` folder.
+
+Django Support
+--------------
+
+Database Introspection
+~~~~~~~~~~~~~~~~~~~~~~
+
+Located in folder ``tests/test_inspectdb``. These tests verify the 
+database introspection.
+
+To run:
+
+- set up the SQLINSTANCE
+- ``python manage.py inspectdb``
+
+
+Main Tests
+~~~~~~~~~~
+
+The tests for basic functionality and regressions are located in the 
+``tests/test_main/`` folder.
+
+To run:
+    
+- set up the SQLINSTANCE
+- ``python manage.py test``
+
+.. note::
+
+    The test app ``apitest`` contains a test suite for checking DB-API 2
+    conformance. 
+
+    To run only the DB-API 2 tests::
+
+        python manage.py test apitest
+
+Running Django Test Suite
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To `run the Django test suite`_, you will need to create a settings file that lists 
+'sqlserver_ado' as the :setting:`ENGINE`.
+
+Example settings:
+
+    .. code-block:: python
+    
+        DATABASES = {
+            'default': {
+                'ENGINE': 'sqlserver_ado',
+                'NAME': 'django_framework',
+                'HOST': r'localhost\ss2008',
+                'USER': '',
+                'PASSWORD': '',
+            },
+            'other': {
+                'ENGINE': 'sqlserver_ado',
+                'NAME': 'django_framework_other',
+                'HOST': r'localhost\ss2008',
+                'USER': '',
+                'PASSWORD': '',
+            }
+        }
+        
+        SECRET_KEY = "django_tests_secret_key"
+
+
+.. _`run the Django test suite`: https://docs.djangoproject.com/en/dev/internals/contributing/writing-code/unit-tests/
