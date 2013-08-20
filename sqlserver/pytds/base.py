@@ -18,6 +18,9 @@ from sqlserver.base import (
 
 from .introspection import DatabaseIntrospection
 
+Database = pytds
+
+
 class DatabaseWrapper(SqlServerBaseWrapper):
     Database = pytds
 
