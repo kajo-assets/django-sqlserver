@@ -36,7 +36,7 @@ class DatabaseWrapper(SqlServerBaseWrapper):
         if self.connection is None:
             self.connection = self.get_new_connection(self.settings_dict)
         cursor = self.connection.cursor()
-        cursor.tzinfo_factory = utc_tzinfo_factory
+        cursor.tzinfo_factory = utc_tzinfo_factory if settings.USE_TZ else None
         return CursorWrapper(cursor)
 
     def _set_autocommit(self, autocommit):
