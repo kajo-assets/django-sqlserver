@@ -90,7 +90,7 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
             self.features.supports_microsecond_precision = supports_new_date_types
             if supports_new_date_types:
                 self.creation._patch_for_sql2008_and_up()
-        if self.settings_dict["OPTIONS"].get("allow_nulls_in_unique_constraints", True):
+        if settings_dict["OPTIONS"].get("allow_nulls_in_unique_constraints", True):
             self.features.ignores_nulls_in_unique_constraints = self._is_sql2008_and_up(conn)
             if self._is_sql2008_and_up(conn):
                 self.creation.sql_create_model = self.creation.sql_create_model_sql2008
