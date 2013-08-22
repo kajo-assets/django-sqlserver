@@ -25,6 +25,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     ignores_nulls_in_unique_constraints = False
     allows_group_by_pk = False
+    allows_group_by_ordinal = False
     supports_microsecond_precision = False
     supports_subqueries_in_group_by = False
     allow_sliced_subqueries = False
