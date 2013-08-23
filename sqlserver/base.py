@@ -183,11 +183,13 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
             cursor = self._cursor()
         if not table_names:
             cursor.execute('DBCC CHECKCONSTRAINTS WITH ALL_CONSTRAINTS')
+            if cursor.description:
+                raise utils.IntegrityError(cursor.fetchall())
         else:
             qn = self.ops.quote_name
             for name in table_names:
                 cursor.execute('DBCC CHECKCONSTRAINTS({0}) WITH ALL_CONSTRAINTS'.format(
                     qn(name)
                 ))
-        if cursor.description:
-            raise utils.IntegrityError(cursor.fetchall())
+                if cursor.description:
+                    raise utils.IntegrityError(cursor.fetchall())
