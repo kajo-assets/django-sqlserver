@@ -20,4 +20,4 @@ set COMPUTERNAME=%HOST%
 python tests\test_main\manage.py test --noinput
 
 set PYTHONPATH=.
-python env\src\django\tests\runtests.py --noinput --settings=django_settings
+python env\src\django\tests\runtests.py --noinput --settings=django_settings --liveserver=localhost:8200-8300

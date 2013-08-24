@@ -25,6 +25,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     ignores_nulls_in_unique_constraints = False
     allows_group_by_pk = False
+    allows_group_by_ordinal = False
     supports_microsecond_precision = False
     supports_subqueries_in_group_by = False
     allow_sliced_subqueries = False
@@ -86,9 +87,11 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         self.features.has_bulk_insert = self._is_sql2008_and_up(conn)
         if not type(self).__module__.startswith('sqlserver.pymssql.'):
             # pymssql doesn't support new sql server date types
-            self.features.supports_microsecond_precision = self._is_sql2008_and_up(conn)
-            self.creation._patch_for_sql2008_and_up()
-        if self.settings_dict["OPTIONS"].get("allow_nulls_in_unique_constraints", True):
+            supports_new_date_types = self._is_sql2008_and_up(conn)
+            self.features.supports_microsecond_precision = supports_new_date_types
+            if supports_new_date_types:
+                self.creation._patch_for_sql2008_and_up()
+        if settings_dict["OPTIONS"].get("allow_nulls_in_unique_constraints", True):
             self.features.ignores_nulls_in_unique_constraints = self._is_sql2008_and_up(conn)
             if self._is_sql2008_and_up(conn):
                 self.creation.sql_create_model = self.creation.sql_create_model_sql2008
@@ -180,11 +183,13 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
             cursor = self._cursor()
         if not table_names:
             cursor.execute('DBCC CHECKCONSTRAINTS WITH ALL_CONSTRAINTS')
+            if cursor.description:
+                raise utils.IntegrityError(cursor.fetchall())
         else:
             qn = self.ops.quote_name
             for name in table_names:
                 cursor.execute('DBCC CHECKCONSTRAINTS({0}) WITH ALL_CONSTRAINTS'.format(
                     qn(name)
                 ))
-        if cursor.description:
-            raise utils.IntegrityError(cursor.fetchall())
+                if cursor.description:
+                    raise utils.IntegrityError(cursor.fetchall())

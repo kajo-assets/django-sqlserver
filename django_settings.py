@@ -3,12 +3,15 @@ import os
 
 options = {'use_mars': True,
            'allow_nulls_in_unique_constraints': False,  # sqlserver doesn't fully support multiple nulls in unique constraint
+           'extra_params': 'MARS Connection=True;',
            }
+
+DATABASE_HOST = os.environ['HOST'] + '\\' + os.environ.get('SQLINSTANCE', '')
 
 DATABASES = {
     'default': {
         'ENGINE': os.environ['BACKEND'],
-        'HOST': os.environ['HOST'],
+        'HOST': DATABASE_HOST,
         'NAME': os.environ['DATABASE_NAME'] + '_default',
         'USER': os.environ['SQLUSER'],
         'PASSWORD': os.environ['SQLPASSWORD'],
@@ -16,7 +19,7 @@ DATABASES = {
         },
     'other': {
         'ENGINE': os.environ['BACKEND'],
-        'HOST': os.environ['HOST'],
+        'HOST': DATABASE_HOST,
         'NAME': os.environ['DATABASE_NAME'] + '_other',
         'USER': os.environ['SQLUSER'],
         'PASSWORD': os.environ['SQLPASSWORD'],

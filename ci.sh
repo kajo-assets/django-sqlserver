@@ -27,4 +27,4 @@ python tests/test_main/manage.py test --noinput
 #python tests/test_stardardapps/manage.py test --noinput
 
 # run django test suite
-env PYTHONPATH=. python env/src/django/tests/runtests.py --noinput --settings=django_settings
+env PYTHONPATH=. python env/src/django/tests/runtests.py --noinput --settings=django_settings --liveserver=localhost:8200-8300

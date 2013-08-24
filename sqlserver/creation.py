@@ -92,7 +92,7 @@ class DatabaseCreation(BaseDatabaseCreation):
         sql = 'CREATE ASSEMBLY regex_clr FROM 0x' + assembly
         cursor = self.connection.cursor()
         try:
-            cursor.execute('USE [{}]'.format(test_database_name))
+            cursor.execute('USE [{0}]'.format(test_database_name))
             cursor.execute(sql)
             cursor.execute('''
             create function REGEXP_LIKE
@@ -172,7 +172,7 @@ class DatabaseCreation(BaseDatabaseCreation):
                 fix_fields.append(f)
                 f._unique = False
         for field_constraints in opts.unique_together:
-            predicate_parts = ['[{}] '.format(opts.get_field(f).column) + style.SQL_KEYWORD('IS NOT NULL')
+            predicate_parts = ['[{0}] '.format(opts.get_field(f).column) + style.SQL_KEYWORD('IS NOT NULL')
                                for f in field_constraints if opts.get_field(f).null]
             index_name = 'UX_{table}_{columns}'.format(
                 table=opts.db_table,

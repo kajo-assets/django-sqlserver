@@ -18,6 +18,13 @@ from sqlserver.base import (
 
 from .introspection import DatabaseIntrospection
 
+Database = pytds
+
+def utc_tzinfo_factory(offset):
+    if offset != 0:
+        raise AssertionError("database connection isn't set to UTC")
+    return utc
+
 class DatabaseWrapper(SqlServerBaseWrapper):
     Database = pytds
 
@@ -28,7 +35,9 @@ class DatabaseWrapper(SqlServerBaseWrapper):
     def _cursor(self):
         if self.connection is None:
             self.connection = self.get_new_connection(self.settings_dict)
-        return CursorWrapper(self.connection.cursor())
+        cursor = self.connection.cursor()
+        cursor.tzinfo_factory = utc_tzinfo_factory if settings.USE_TZ else None
+        return CursorWrapper(cursor)
 
     def _set_autocommit(self, autocommit):
         self.connection.autocommit = autocommit
