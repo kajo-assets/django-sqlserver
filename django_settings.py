@@ -3,6 +3,7 @@ import os
 
 options = {'use_mars': True,
            'allow_nulls_in_unique_constraints': False,  # sqlserver doesn't fully support multiple nulls in unique constraint
+           'extra_params': 'MARS Connection=True;',
            }
 
 DATABASE_HOST = os.environ['HOST'] + '\\' + os.environ.get('SQLINSTANCE', '')
