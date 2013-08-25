@@ -85,8 +85,8 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         # The OUTPUT clause is supported in 2005+ sql servers
         self.features.can_return_id_from_insert = self._is_sql2005_and_up(conn)
         self.features.has_bulk_insert = self._is_sql2008_and_up(conn)
-        if not type(self).__module__.startswith('sqlserver.pymssql.'):
-            # pymssql doesn't support new sql server date types
+        if type(self).__module__.startswith('sqlserver.pytds.'):
+            # only pytds support new sql server date types
             supports_new_date_types = self._is_sql2008_and_up(conn)
             self.features.supports_microsecond_precision = supports_new_date_types
             if supports_new_date_types:
