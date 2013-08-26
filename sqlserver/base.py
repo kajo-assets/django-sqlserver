@@ -154,8 +154,8 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
             cursor = self._cursor()
         cursor.execute("EXEC sp_MSforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT all'")
         # this breakes test on ado, see Issue #2
-        #while cursor.nextset():
-        #    pass
+        while cursor.nextset():
+            pass
         cursor.close()
         return True
 
@@ -169,8 +169,8 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
             cursor = self._cursor()
         cursor.execute("EXEC sp_MSforeachtable 'ALTER TABLE ? WITH NOCHECK CHECK CONSTRAINT all'")
         # this breakes test on ado, see Issue #2
-        #while cursor.nextset():
-        #    pass
+        while cursor.nextset():
+            pass
         cursor.close()
 
     def check_constraints(self, table_names=None):
