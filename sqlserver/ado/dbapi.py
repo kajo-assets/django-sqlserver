@@ -603,7 +603,7 @@ class Cursor(object):
         """
         self.messages = list()
         if self.connection is None or self.rs is None:
-            self._raiseCursorError(Error, None)
+            #self._raiseCursorError(Error, None)
             return None
 
         recordset = self.rs.NextRecordset()[0]
