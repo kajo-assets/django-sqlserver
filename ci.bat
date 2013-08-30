@@ -4,7 +4,7 @@ call env\scripts\activate.bat
 
 set django_branch=stable/%DJANGO_VER%.x
 
-if not exist env\src\django call git clone https://github.com/django/django.git -b %django_branch% env/src/django
+if not exist env\src\django call git clone https://github.com/denisenkom/django.git -b %django_branch% env/src/django
 pushd env\src\django
 call git pull
 popd
@@ -20,4 +20,4 @@ set COMPUTERNAME=%HOST%
 python tests\test_main\manage.py test --noinput
 
 set PYTHONPATH=.
-python env\src\django\tests\runtests.py --noinput --settings=django_settings
+python env\src\django\tests\runtests.py --noinput --settings=django_settings --liveserver=localhost:8200-8300

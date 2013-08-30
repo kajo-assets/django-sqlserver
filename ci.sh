@@ -7,7 +7,7 @@ $PYTHONHOME/bin/virtualenv --no-site-packages env
 django_branch=stable/${DJANGO_VER}.x
 
 if [ ! -d env/src/django ]; then
-    git clone https://github.com/django/django.git -b $django_branch env/src/django
+    git clone https://github.com/denisenkom/django.git -b $django_branch env/src/django
 fi
 pushd env/src/django
 git pull
@@ -27,4 +27,4 @@ python tests/test_main/manage.py test --noinput
 #python tests/test_stardardapps/manage.py test --noinput
 
 # run django test suite
-env PYTHONPATH=. python env/src/django/tests/runtests.py --noinput --settings=django_settings
+env PYTHONPATH=. python env/src/django/tests/runtests.py --noinput --settings=django_settings --liveserver=localhost:8200-8300

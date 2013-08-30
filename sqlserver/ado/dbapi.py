@@ -191,7 +191,7 @@ def _configure_parameter(p, value):
 
     if isinstance(value, basestring):
         p.Value = value
-        p.Size = len(value)
+        #p.Size = len(value)
 
     elif isinstance(value, buffer):
         p.Size = len(value)
@@ -215,7 +215,13 @@ def _configure_parameter(p, value):
             p.Precision = digit_count + exponent
 
     elif isinstance(value, datetime.time):
+            if getattr(settings, 'USE_TZ', False) and value.tzinfo:
+                value = value.astimezone(timezone.utc)
             p.Value = datetime.datetime(1,1,1, value.hour, value.minute, value.second)
+    elif isinstance(value, datetime.datetime):
+            if getattr(settings, 'USE_TZ', False) and value.tzinfo:
+                value = value.astimezone(timezone.utc)
+            p.Value = value
     else:
         # For any other type, set the value and let pythoncom do the right thing.
         p.Value = value
@@ -431,8 +437,8 @@ class Cursor(object):
             self._description_from_recordset(recordset[0])
         except Exception as e:
             _message = ""
-            if hasattr(e, 'args'): _message += str(e.args)+"\n"
-            _message += "Command:\n%s\nParameters:\n%s" %  (self.cmd.CommandText, format_parameters(self.cmd.Parameters, True))
+            if hasattr(e, 'args'): _message += str(e.args)
+            #_message += "Command:\n%s\nParameters:\n%s" %  (self.cmd.CommandText, format_parameters(self.cmd.Parameters, True))
             klass = self.connection._suggest_error_class()
             self._raiseCursorError(klass, _message)
 
@@ -597,7 +603,7 @@ class Cursor(object):
         """
         self.messages = list()
         if self.connection is None or self.rs is None:
-            self._raiseCursorError(Error, None)
+            #self._raiseCursorError(Error, None)
             return None
 
         recordset = self.rs.NextRecordset()[0]
@@ -687,7 +693,7 @@ _variantConversions = MultiMap(
         (adBoolean,): bool,
         adoLongTypes+adoRowIdTypes : long,
         adoIntegerTypes: int,
-        adoBinaryTypes: buffer, 
+        adoBinaryTypes: buffer,
     }, 
     lambda x: x)
 
