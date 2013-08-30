@@ -32,6 +32,7 @@ class DatabaseCreation(BaseDatabaseCreation):
         'SmallIntegerField':            'smallint',
         'TextField':                    'nvarchar(max)',
         'TimeField':                    'datetime',
+        'BinaryField':                  'varbinary(max)',
     }
     _sql2008_date_types = {
         'DateField': 'date',
