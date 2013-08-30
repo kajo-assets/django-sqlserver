@@ -28,6 +28,9 @@ class DatabaseOperations(BaseDatabaseOperations):
             self.quote_name(field_name),
         )
 
+    def datetime_extract_sql(self, lookup_type, field_name, tzname):
+        return self.date_extract_sql(lookup_type, field_name), []
+
     def date_interval_sql(self, sql, connector, timedelta):
         """
         implements the interval functionality for expressions
