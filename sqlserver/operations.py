@@ -52,6 +52,9 @@ class DatabaseOperations(BaseDatabaseOperations):
     def date_trunc_sql(self, lookup_type, field_name):
         return "DATEADD(%s, DATEDIFF(%s, 0, %s), 0)" % (lookup_type, lookup_type, field_name)
 
+    def datetime_trunc_sql(self, lookup_type, field_name, tzname):
+        return "DATEADD(%s, DATEDIFF(%s, 0, %s), 0)" % (lookup_type, lookup_type, field_name), []
+
     def last_insert_id(self, cursor, table_name, pk_name):
         """
         Fetch the last inserted ID by executing another query.
