@@ -8,6 +8,11 @@ try:
 except:
     from django.utils.encoding import smart_unicode as smart_text
 
+try:
+    import pytz
+except ImportError:
+    pytz = None
+
 from django.utils import timezone
 
 class DatabaseOperations(BaseDatabaseOperations):
@@ -53,7 +58,14 @@ class DatabaseOperations(BaseDatabaseOperations):
         return "DATEADD(%s, DATEDIFF(%s, 0, %s), 0)" % (lookup_type, lookup_type, field_name)
 
     def datetime_trunc_sql(self, lookup_type, field_name, tzname):
-        return "DATEADD(%s, DATEDIFF(%s, 0, %s), 0)" % (lookup_type, lookup_type, field_name), []
+        if settings.USE_TZ:
+            tz = pytz.timezone(tzname)
+            td = tz.utcoffset(datetime.datetime(2000, 1, 1))
+            total_minutes = td.total_seconds() // 60
+            hours, minutes = divmod(total_minutes, 60)
+            tzoffset = "%+03d:%02d" % (hours, minutes)
+            field_name = "CAST(SWITCHOFFSET(TODATETIMEOFFSET(%s, '+00:00'), '%s') AS DATETIME2)" % (field_name, tzoffset)
+        return "DATEADD(%s, DATEDIFF(%s, '20000101', %s), '20000101')" % (lookup_type, lookup_type, field_name), []
 
     def last_insert_id(self, cursor, table_name, pk_name):
         """
