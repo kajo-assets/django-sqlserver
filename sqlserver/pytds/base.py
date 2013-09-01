@@ -45,7 +45,7 @@ class DatabaseWrapper(SqlServerBaseWrapper):
     def _get_new_connection(self, settings_dict):
         """Connect to the database"""
         options = settings_dict.get('OPTIONS', {})
-        autocommit = options.get('autocommit', False)
+        autocommit = settings_dict['AUTOCOMMIT'] or options.get('autocommit', False)
         return pytds.connect(
             server=settings_dict['HOST'],
             database=settings_dict['NAME'],
