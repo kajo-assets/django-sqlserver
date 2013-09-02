@@ -34,7 +34,19 @@ class DatabaseOperations(BaseDatabaseOperations):
         )
 
     def datetime_extract_sql(self, lookup_type, field_name, tzname):
-        return self.date_extract_sql(lookup_type, field_name), []
+        if settings.USE_TZ:
+            tz = pytz.timezone(tzname)
+            td = tz.utcoffset(datetime.datetime(2000, 1, 1))
+            total_minutes = td.total_seconds() // 60
+            hours, minutes = divmod(total_minutes, 60)
+            tzoffset = "%+03d:%02d" % (hours, minutes)
+            field_name = "CAST(SWITCHOFFSET(TODATETIMEOFFSET(%s, '+00:00'), '%s') AS DATETIME2)" % (field_name, tzoffset)
+        if lookup_type == 'week_day':
+            lookup_type = 'weekday'
+        return 'DATEPART({0}, {1})'.format(
+            lookup_type,
+            field_name,
+            ), []
 
     def date_interval_sql(self, sql, connector, timedelta):
         """
