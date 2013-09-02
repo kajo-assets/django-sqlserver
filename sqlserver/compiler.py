@@ -280,13 +280,13 @@ class SQLCompiler(compiler.SQLCompiler):
 
         return ', '.join(outer), ', '.join(inner) + from_clause.format(**parens)
 
-    def get_ordering(self):
-        # The ORDER BY clause is invalid in views, inline functions, 
-        # derived tables, subqueries, and common table expressions, 
-        # unless TOP or FOR XML is also specified.
-        if getattr(self.query, '_mssql_ordering_not_allowed', False):
-            return (None, None)
-        return super(SQLCompiler, self).get_ordering()
+    #def get_ordering(self):
+     #   # The ORDER BY clause is invalid in views, inline functions,
+     #   # derived tables, subqueries, and common table expressions,
+     #   # unless TOP or FOR XML is also specified.
+     #   if getattr(self.query, '_mssql_ordering_not_allowed', False):
+     #       return (None, None)
+     #   return super(SQLCompiler, self).get_ordering()
 
 class SQLInsertCompiler(compiler.SQLInsertCompiler, SQLCompiler):
     # search for after table/column list
