@@ -29,6 +29,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_microsecond_precision = False
     supports_subqueries_in_group_by = False
     allow_sliced_subqueries = False
+    uses_savepoints = True
 
 
 class SqlServerBaseWrapper(BaseDatabaseWrapper):
@@ -193,3 +194,6 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
                 ))
                 if cursor.description:
                     raise utils.IntegrityError(cursor.fetchall())
+
+    def _savepoint_commit(self, sid):
+        pass
