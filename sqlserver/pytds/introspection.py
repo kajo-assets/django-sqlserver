@@ -20,4 +20,6 @@ class DatabaseIntrospection(BaseSqlDatabaseIntrospection):
         pytds.XSYBNVARCHAR: 'CharField',
         pytds.SYBTEXT: 'TextField',
         pytds.SYBNTEXT: 'TextField',
+        pytds.XSYBVARBINARY: 'BinaryField',
+        pytds.XSYBBINARY: 'BinaryField',
     }
