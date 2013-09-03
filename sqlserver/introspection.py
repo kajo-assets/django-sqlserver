@@ -47,7 +47,19 @@ class BaseSqlDatabaseIntrospection(BaseDatabaseIntrospection):
 
     def get_relations(self, cursor, table_name):
         source_field_dict = self._name_to_index(cursor, table_name)
+        relation_map = dict()
 
+        for source_column, target_table, target_column in self.get_key_columns(cursor, table_name):
+            target_field_dict = self._name_to_index(cursor, target_table)
+            target_index = target_field_dict[target_column]
+            source_index = source_field_dict[source_column]
+
+            relation_map[source_index] = (target_index, target_table)
+
+        return relation_map
+
+    # django 1.6 version
+    def get_key_columns(self, cursor, table_name):
         sql = """
 select
     COLUMN_NAME = fk_cols.COLUMN_NAME,
@@ -75,17 +87,7 @@ where
 	fk.TABLE_NAME = %s"""
 
         cursor.execute(sql,[table_name])
-        relations = cursor.fetchall()
-        relation_map = dict()
-
-        for source_column, target_table, target_column in relations:
-            target_field_dict = self._name_to_index(cursor, target_table)
-            target_index = target_field_dict[target_column]
-            source_index = source_field_dict[source_column]
-
-            relation_map[source_index] = (target_index, target_table)
-
-        return relation_map
+        return list(cursor.fetchall())
 
     def get_indexes(self, cursor, table_name):
     #    Returns a dictionary of fieldname -> infodict for the given table,
