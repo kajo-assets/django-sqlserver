@@ -288,6 +288,16 @@ class SQLCompiler(compiler.SQLCompiler):
             return (None, [], [])
         return super(SQLCompiler, self).get_ordering()
 
+    def get_ordering_old(self):
+        # Django 1.5 and earlier version
+        # The ORDER BY clause is invalid in views, inline functions,
+        # derived tables, subqueries, and common table expressions,
+        # unless TOP or FOR XML is also specified.
+        if getattr(self.query, '_mssql_ordering_not_allowed', False):
+            return (None, [])
+        return super(SQLCompiler, self).get_ordering()
+
+
 class SQLInsertCompiler(compiler.SQLInsertCompiler, SQLCompiler):
     # search for after table/column list
     _re_values_sub = re.compile(r'(?P<prefix>\)|\])(?P<default>\s*|\s*default\s*)values(?P<suffix>\s*|\s+\()?', re.IGNORECASE)

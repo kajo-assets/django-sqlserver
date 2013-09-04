@@ -127,6 +127,10 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
                 connection_created.send(sender=self.__class__, connection=self)
             return self.CursorWrapper(self.create_cursor(), self.Database)
 
+        from .compiler import SQLCompiler
+
+        SQLCompiler.get_ordering = SQLCompiler.get_ordering_old
+
     def get_new_connection(self, conn_params):
         """Connect to the database"""
         conn = self._get_new_connection(conn_params)
