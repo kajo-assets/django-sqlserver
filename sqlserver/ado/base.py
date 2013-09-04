@@ -124,27 +124,29 @@ class DatabaseWrapper(SqlServerBaseWrapper):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
         self.introspection = DatabaseIntrospection(self)
 
-    def _get_new_connection(self, settings_dict):
+    def get_connection_params(self):
+        settings_dict = self.settings_dict
         options = settings_dict.get('OPTIONS', {})
         autocommit = options.get('autocommit', False)
-        conn = Database.connect(
-            make_connection_string(settings_dict),
-            self.command_timeout,
-            use_transactions=not autocommit,
-        )
+        return {
+            'connection_string': make_connection_string(settings_dict),
+            'timeout': self.command_timeout,
+            'use_transactions': not autocommit,
+            }
+
+    def _get_new_connection(self, conn_params):
+        conn = Database.connect(**conn_params)
 
         # cache the properties on the connection
         conn.adoConnProperties = dict([(x.Name, x.Value) for x in conn.adoConn.Properties])
         return conn
 
-    def __connect(self):
-        """Connect to the database"""
-        self.connection = self.get_new_connection(self.settings_dict)
+    def create_cursor(self):
+        cursor = self.connection.cursor()
+        return cursor
 
-    def _cursor(self):
-        if self.connection is None:
-            self.__connect()
-        return CursorWrapper(Database.Cursor(self.connection))
+    def _set_autocommit(self, value):
+        self.connection.set_autocommit(value)
 
     def __get_dbms_version(self, conn):
         """
@@ -157,39 +159,3 @@ class DatabaseWrapper(SqlServerBaseWrapper):
 
     def _is_sql2008_and_up(self, conn):
         return int(self.__get_dbms_version(conn).split('.')[0]) >= VERSION_SQL2008
-
-
-class CursorWrapper(object):
-    def __init__(self, cursor):
-        self.cursor = cursor
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.cursor.close()
-
-    def execute(self, sql, params = ()):
-        try:
-            return self.cursor.execute(sql, params)
-        except adodb.IntegrityError as e:
-            six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
-        except adodb.DatabaseError as e:
-            six.reraise(utils.DatabaseError, utils.DatabaseError(*tuple(e.args)), sys.exc_info()[2])
-
-    def executemany(self, sql, params):
-        try:
-            return self.cursor.executemany(sql, params)
-        except adodb.IntegrityError as e:
-            six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
-        except adodb.DatabaseError as e:
-            six.reraise(utils.DatabaseError, utils.DatabaseError(*tuple(e.args)), sys.exc_info()[2])
-
-    def __getattr__(self, attr):
-        if attr in self.__dict__:
-            return self.__dict__[attr]
-        else:
-            return getattr(self.cursor, attr)
-
-    def __iter__(self):
-        return iter(self.cursor)

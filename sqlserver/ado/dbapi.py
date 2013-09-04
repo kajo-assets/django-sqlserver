@@ -242,6 +242,16 @@ class Connection(object):
             self.adoConn.IsolationLevel = defaultIsolationLevel
             self.adoConn.BeginTrans() # Disables autocommit per DBPAI
 
+    def set_autocommit(self, value):
+        if self.supportsTransactions == (not value):
+            return
+        if self.supportsTransactions:
+            self.adoConn.RollbackTrans() # Disables autocommit per DBPAI
+        else:
+            self.adoConn.IsolationLevel = defaultIsolationLevel
+            self.adoConn.BeginTrans() # Disables autocommit per DBPAI
+        self.supportsTransactions = not value
+
     def _raiseConnectionError(self, errorclass, errorvalue):
         eh = self.errorhandler
         if eh is None:
