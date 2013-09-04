@@ -32,6 +32,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_subqueries_in_group_by = False
     allow_sliced_subqueries = False
     uses_savepoints = True
+    supports_paramstyle_pyformat = False
 
 
 class SqlServerBaseWrapper(BaseDatabaseWrapper):
@@ -132,6 +133,7 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         self.features.can_return_id_from_insert = self._is_sql2005_and_up(conn)
         self.features.has_bulk_insert = self._is_sql2008_and_up(conn)
         if type(self).__module__.startswith('sqlserver.pytds.'):
+            self.features.supports_paramstyle_pyformat = True
             # only pytds support new sql server date types
             supports_new_date_types = self._is_sql2008_and_up(conn)
             self.features.supports_microsecond_precision = supports_new_date_types
