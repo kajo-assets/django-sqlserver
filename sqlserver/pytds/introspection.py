@@ -5,6 +5,7 @@ class DatabaseIntrospection(BaseSqlDatabaseIntrospection):
     data_types_reverse = {
         #'AUTO_FIELD_MARKER': 'AutoField',
         pytds.SYBBIT: 'BooleanField',
+        pytds.SYBBITN: 'BooleanField',
         pytds.XSYBCHAR: 'CharField',
         pytds.XSYBNCHAR: 'CharField',
         pytds.SYBDECIMAL: 'DecimalField',
@@ -22,4 +23,11 @@ class DatabaseIntrospection(BaseSqlDatabaseIntrospection):
         pytds.SYBNTEXT: 'TextField',
         pytds.XSYBVARBINARY: 'BinaryField',
         pytds.XSYBBINARY: 'BinaryField',
+        pytds.SYBDATETIME: 'DateTimeField',
+        pytds.SYBDATETIME4: 'DateTimeField',
+        pytds.SYBDATETIMN: 'DateTimeField',
+        pytds.SYBMSDATETIME2: 'DateTimeField',
+        pytds.SYBMSDATETIMEOFFSET: 'DateTimeField',
+        pytds.SYBMSTIME: 'TimeField',
+        pytds.SYBMSDATE: 'DateField',
     }
