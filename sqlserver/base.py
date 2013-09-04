@@ -2,6 +2,8 @@
 from django.db import utils
 from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseValidation, BaseDatabaseClient
 from django.db.backends.signals import connection_created
+import six
+import sys
 
 from .creation import DatabaseCreation
 from .operations import DatabaseOperations
@@ -77,12 +79,55 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         self.ops.is_sql2005 = self.is_sql2005
         self.ops.is_sql2008 = self.is_sql2008
 
-    def get_connection_params(self):
-        return self.settings_dict
+    if not hasattr(BaseDatabaseWrapper, '_cursor'):
+        # support for django 1.5 and previous
+        class CursorWrapper(object):
+            def __init__(self, cursor, database):
+                self.cursor = cursor
+                self.database = database
 
-    def get_new_connection(self, settings_dict):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, type, value, traceback):
+                self.cursor.close()
+
+            def execute(self, sql, params = ()):
+                try:
+                    return self.cursor.execute(sql, params)
+                except self.database.IntegrityError as e:
+                    six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
+                except self.database.DatabaseError as e:
+                    six.reraise(utils.DatabaseError, utils.DatabaseError(*tuple(e.args)), sys.exc_info()[2])
+                except:
+                    raise
+
+            def executemany(self, sql, params):
+                try:
+                    return self.cursor.executemany(sql, params)
+                except self.database.IntegrityError as e:
+                    six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
+                except self.database.DatabaseError as e:
+                    six.reraise(utils.DatabaseError, utils.DatabaseError(*tuple(e.args)), sys.exc_info()[2])
+
+            def __getattr__(self, attr):
+                if attr in self.__dict__:
+                    return self.__dict__[attr]
+                else:
+                    return getattr(self.cursor, attr)
+
+            def __iter__(self):
+                return iter(self.cursor)
+
+        def _cursor(self):
+            if self.connection is None:
+                self.connection = self.get_new_connection(self.settings_dict)
+                connection_created.send(sender=self.__class__, connection=self)
+            return self.CursorWrapper(self.create_cursor(), self.Database)
+
+    def get_new_connection(self, conn_params):
         """Connect to the database"""
-        conn = self._get_new_connection(settings_dict)
+        conn = self._get_new_connection(conn_params)
         # The OUTPUT clause is supported in 2005+ sql servers
         self.features.can_return_id_from_insert = self._is_sql2005_and_up(conn)
         self.features.has_bulk_insert = self._is_sql2008_and_up(conn)
@@ -92,11 +137,10 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
             self.features.supports_microsecond_precision = supports_new_date_types
             if supports_new_date_types:
                 self.creation._patch_for_sql2008_and_up()
-        if settings_dict["OPTIONS"].get("allow_nulls_in_unique_constraints", True):
+        if self.settings_dict["OPTIONS"].get("allow_nulls_in_unique_constraints", True):
             self.features.ignores_nulls_in_unique_constraints = self._is_sql2008_and_up(conn)
             if self._is_sql2008_and_up(conn):
                 self.creation.sql_create_model = self.creation.sql_create_model_sql2008
-        connection_created.send(sender=self.__class__, connection=self)
         return conn
 
     def _get_new_connection(self, settings_dict):
@@ -140,9 +184,6 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         raise NotImplementedError
 
     def _is_sql2008_and_up(self, conn):
-        raise NotImplementedError
-
-    def _cursor(self):
         raise NotImplementedError
 
     def disable_constraint_checking(self):
