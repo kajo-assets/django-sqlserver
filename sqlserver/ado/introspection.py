@@ -20,4 +20,7 @@ class DatabaseIntrospection(BaseSqlDatabaseIntrospection):
         ado_consts.adVarWChar: 'CharField',
         ado_consts.adLongVarWChar: 'TextField',
         ado_consts.adLongVarChar: 'TextField',
+        ado_consts.adBinary: 'BinaryField',
+        ado_consts.adVarBinary: 'BinaryField',
+        ado_consts.adLongVarBinary: 'BinaryField',
         }
