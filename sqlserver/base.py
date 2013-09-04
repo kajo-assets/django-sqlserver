@@ -123,7 +123,7 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
 
         def _cursor(self):
             if self.connection is None:
-                self.connection = self.get_new_connection(self.settings_dict)
+                self.connection = self.get_new_connection(self.get_connection_params())
                 connection_created.send(sender=self.__class__, connection=self)
             return self.CursorWrapper(self.create_cursor(), self.Database)
 
