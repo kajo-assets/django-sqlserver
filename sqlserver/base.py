@@ -33,6 +33,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     allow_sliced_subqueries = False
     uses_savepoints = True
     supports_paramstyle_pyformat = False
+    supports_transactions = True
 
 
 class SqlServerBaseWrapper(BaseDatabaseWrapper):
