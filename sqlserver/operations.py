@@ -1,6 +1,7 @@
 import datetime
 import time
 import django
+import django.core.exceptions
 from django.conf import settings
 from django.db.backends import BaseDatabaseOperations
 try:
@@ -35,6 +36,10 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def datetime_extract_sql(self, lookup_type, field_name, tzname):
         if settings.USE_TZ:
+            if pytz is None:
+                from django.core.exceptions import ImproperlyConfigured
+                raise ImproperlyConfigured("This query requires pytz, "
+                                           "but it isn't installed.")
             tz = pytz.timezone(tzname)
             td = tz.utcoffset(datetime.datetime(2000, 1, 1))
             total_minutes = td.total_seconds() // 60
@@ -71,6 +76,10 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def datetime_trunc_sql(self, lookup_type, field_name, tzname):
         if settings.USE_TZ:
+            if pytz is None:
+                from django.core.exceptions import ImproperlyConfigured
+                raise ImproperlyConfigured("This query requires pytz, "
+                                           "but it isn't installed.")
             tz = pytz.timezone(tzname)
             td = tz.utcoffset(datetime.datetime(2000, 1, 1))
             total_minutes = td.total_seconds() // 60

@@ -2,8 +2,14 @@
 from django.db import utils
 from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseValidation, BaseDatabaseClient
 from django.db.backends.signals import connection_created
+from django.utils.functional import cached_property
 import six
 import sys
+
+try:
+    import pytz
+except ImportError:
+    pytz = None
 
 from .creation import DatabaseCreation
 from .operations import DatabaseOperations
@@ -34,6 +40,10 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     uses_savepoints = True
     supports_paramstyle_pyformat = False
     supports_transactions = True
+
+    @cached_property
+    def has_zoneinfo_database(self):
+        return pytz is not None
 
 
 class SqlServerBaseWrapper(BaseDatabaseWrapper):
