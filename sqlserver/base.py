@@ -13,6 +13,7 @@ except ImportError:
 
 from .creation import DatabaseCreation
 from .operations import DatabaseOperations
+from .schema import DatabaseSchemaEditor
 
 
 class DatabaseFeatures(BaseDatabaseFeatures):
@@ -255,3 +256,7 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
 
     def _savepoint_commit(self, sid):
         pass
+
+    def schema_editor(self):
+        "Returns a new instance of this backend's SchemaEditor"
+        return DatabaseSchemaEditor(self)
