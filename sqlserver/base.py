@@ -45,6 +45,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     uses_savepoints = True
     supports_paramstyle_pyformat = False
     supports_transactions = True
+    requires_literal_defaults = True
 
     @cached_property
     def has_zoneinfo_database(self):
