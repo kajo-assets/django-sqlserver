@@ -3,4 +3,6 @@ from django.db.backends.schema import BaseDatabaseSchemaEditor
 __author__ = 'denisenk'
 
 class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
-    pass
+    sql_delete_table = "DROP TABLE %(table)s"
+    sql_delete_column = "ALTER TABLE %(table)s DROP COLUMN %(column)s"
+    sql_create_column = "ALTER TABLE %(table)s ADD %(column)s %(definition)s"
