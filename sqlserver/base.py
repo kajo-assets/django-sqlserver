@@ -13,7 +13,11 @@ except ImportError:
 
 from .creation import DatabaseCreation
 from .operations import DatabaseOperations
-from .schema import DatabaseSchemaEditor
+
+try:
+    from .schema import DatabaseSchemaEditor
+except ImportError:
+    pass
 
 
 class DatabaseFeatures(BaseDatabaseFeatures):
