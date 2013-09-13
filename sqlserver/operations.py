@@ -1,5 +1,4 @@
 import datetime
-import time
 import django
 import django.core.exceptions
 from django.conf import settings
@@ -274,6 +273,21 @@ class DatabaseOperations(BaseDatabaseOperations):
         all the objects to be inserted.
         """
         return min(len(objs), 1000)
+        
+    def convert_values(self, value, field):
+        """
+        MSSQL needs help with date fields that might come out as strings.
+        """
+        internal_type = field.get_internal_type()
+        if internal_type in ('DateField', 'DateTimeField', 'TimeField'):
+            compiler = self.compiler('SQLCompiler')
+            if internal_type == 'DateTimeField':
+                return compiler._datetime_field.to_python(value)
+            elif internal_type == 'DateField':
+                return compiler._date_field.to_python(value)
+            elif internal_type == 'TimeField':
+                return compiler._time_field.to_python(value)
+        return super(DatabaseOperations, self).convert_values(value, field)
 
     def bulk_insert_sql(self, fields, num_values):
         """

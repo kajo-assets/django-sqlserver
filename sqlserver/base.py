@@ -40,8 +40,12 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     allows_group_by_pk = False
     allows_group_by_ordinal = False
     supports_microsecond_precision = False
-    supports_subqueries_in_group_by = False
     allow_sliced_subqueries = False
+
+    can_introspect_autofield = True
+
+    supports_subqueries_in_group_by = False
+
     uses_savepoints = True
     supports_paramstyle_pyformat = False
     supports_transactions = True
@@ -93,6 +97,16 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
             self.cast_avg_to_float = False
 
         self.ops.features = self.features
+
+        USE_LEGACY_DATE_FIELDS_DEFAULT = True
+        try:
+            use_legacy_date_fields = bool(options.get('use_legacy_date_fields', USE_LEGACY_DATE_FIELDS_DEFAULT))
+        except ValueError:
+            use_legacy_date_fields = USE_LEGACY_DATE_FIELDS_DEFAULT
+
+        if use_legacy_date_fields:
+            self.creation._enable_legacy_date_fields()
+
         self.ops.is_sql2000 = self.is_sql2000
         self.ops.is_sql2005 = self.is_sql2005
         self.ops.is_sql2008 = self.is_sql2008
@@ -158,8 +172,8 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
             # only pytds support new sql server date types
             supports_new_date_types = self._is_sql2008_and_up(conn)
             self.features.supports_microsecond_precision = supports_new_date_types
-            if supports_new_date_types:
-                self.creation._patch_for_sql2008_and_up()
+            if not supports_new_date_types:
+                self.creation._enable_legacy_date_fields()
         if self.settings_dict["OPTIONS"].get("allow_nulls_in_unique_constraints", True):
             self.features.ignores_nulls_in_unique_constraints = self._is_sql2008_and_up(conn)
             if self._is_sql2008_and_up(conn):

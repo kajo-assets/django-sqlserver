@@ -1,13 +1,14 @@
-# This dictionary maps Field objects to their associated Server Server column
-# types, as strings. Column-type strings can contain format strings; they'll
-# be interpolated against the values of Field.__dict__.
+from __future__ import absolute_import
+
 from django.conf import settings
 from django.db.backends.creation import BaseDatabaseCreation, TEST_DATABASE_PREFIX
 from django.db.utils import load_backend
-import sys
-import  six
+from django.utils import six
 
 class DatabaseCreation(BaseDatabaseCreation):
+    # This dictionary maps Field objects to their associated Server Server column
+    # types, as strings. Column-type strings can contain format strings; they'll
+    # be interpolated against the values of Field.__dict__.
     data_types = {
         'AutoField':                    'int IDENTITY (1, 1)',
         'BigAutoField':                 'bigint IDENTITY (1, 1)',
@@ -15,15 +16,19 @@ class DatabaseCreation(BaseDatabaseCreation):
         'BooleanField':                 'bit',
         'CharField':                    'nvarchar(%(max_length)s)',
         'CommaSeparatedIntegerField':   'nvarchar(%(max_length)s)',
-        'DateField':                    'datetime',
-        'DateTimeField':                'datetime',
+        'DateField':                    'date',
+        'DateTimeField':                'datetime2',
         'DecimalField':                 'decimal(%(max_digits)s, %(decimal_places)s)',
         'FileField':                    'nvarchar(%(max_length)s)',
         'FilePathField':                'nvarchar(%(max_length)s)',
         'FloatField':                   'double precision',
+        'GenericIPAddressField':        'nvarchar(39)',
         'IntegerField':                 'int',
         'IPAddressField':               'nvarchar(15)',
-        'GenericIPAddressField':        'nvarchar(39)',
+        'LegacyDateTimeField':          'datetime',
+        'NewDateField':                 'date',
+        'NewDateTimeField':             'datetime2',
+        'NewTimeField':                 'time',
         'NullBooleanField':             'bit',
         'OneToOneField':                'int',
         'PositiveIntegerField':         'int CHECK ([%(column)s] >= 0)',
@@ -31,17 +36,19 @@ class DatabaseCreation(BaseDatabaseCreation):
         'SlugField':                    'nvarchar(%(max_length)s)',
         'SmallIntegerField':            'smallint',
         'TextField':                    'nvarchar(max)',
-        'TimeField':                    'datetime',
+        'TimeField':                    'time',
         'BinaryField':                  'varbinary(max)',
     }
-    _sql2008_date_types = {
-        'DateField': 'date',
-        'DateTimeField': 'datetime2(6)',
-        'TimeField': 'time(6)',
-        }
 
-    def _patch_for_sql2008_and_up(self):
-        self.data_types.update(self._sql2008_date_types)
+    def _enable_legacy_date_fields(self):
+        """
+        Revert date related data_types to SQL 2005 compatible values.
+        """
+        self.data_types.update({
+            'DateField': 'datetime',
+            'DateTimeField': 'datetime',
+            'TimeField': 'datetime',
+        })
 
     def _create_master_connection(self):
         """
