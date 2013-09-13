@@ -1,0 +1,48 @@
+Changelog
+=========
+
+v1.3 (in development)
+---------------------
+
+- Backend now supports returning the ID from an insert without needing an additional query. This is disabled
+  for SQL Server 2000 (assuming that version still works with this backend). :issue:`17`
+
+  - This will work even if the table has a trigger. :issue:`20`
+
+- Subqueries will have their ordering removed because SQL Server only supports it when using TOP or FOR XML. 
+  This relies upon the ``with_col_aliases`` argument to ``SQLCompiler.as_sql`` only being ``True`` when the query 
+  is a subquery, which is currently the case for all usages in Django 1.5 master. :issue:`18`
+- UPDATE statements will now return the number of rows affected, instead of -1. :issue:`19`
+- Apply fix for :djangoticket:`12192`. If QuerySet slicing would result in ``LIMIT 0``, then it shouldn't reach
+  the database because there will be no response.
+- Implemented DatabaseOperation ``cache_key_culling_sql``. :djangoticket:`18330`
+- Fixed ``cast_avg_to_float`` so that it only controls the cast for ``AVG`` and not mapping other aggregates.
+- Improved IP address detection of :setting:`HOST` setting. :issue:`21`
+- Set database feature ``ignores_nulls_in_unique_constraints = False`` because MSSQL cannot ignore NULLs in 
+  unique constraints.
+- :issue:`26` Documented clustered index issue with Azure SQL. See :ref:`azure-clustered-indices`.
+
+v1.2
+----
+
+- Ensure master connection connects to the correct database name when TEST_NAME is not defined.
+- Connection.close() will now reset adoConn to make sure it's gone before the CoUninitialize.
+- Changed provider default from 'SQLOLEDB' to 'SQLNCLI10' with MARS enabled.
+- Added :ref:`rawstoredproceduremanager`, which provides ``raw_callproc`` that works the same as ``raw``, except
+  expects the name of a stored procedure that returns a result set that matches the model.
+- Documented known issue with database introspection with ``DEBUG = True`` and column names containing '%'.
+  See :ref:`introspecting-percent-columns`.
+- Fixed error with `iendswith` string format operator.
+
+v1.1
+----
+
+- Updated SQLInsertCompiler to work with Django 1.4
+- Added support for ``disable_constraint_checking``, which is required for ``loaddata`` to work properly.
+- Implemented ``DatabaseOperations.date_interval_sql`` to allow using expressions like ``end__lte=F('start')+delta``.
+- Fixed date part extraction for ``week_day``.
+- DatabaseWrapper reports vendor as 'microsoft'.
+- AVG function now matches core backend behaviors and will auto-cast to ``float``, instead of maintaining datatype. 
+  Set database ``OPTIONS`` setting ``disable_avg_cast`` to turn off the auto-cast behavior.
+- StdDev and Variance aggregate functions are now supported and will map to the proper MSSQL named functions. Includes work around for :djangoticket:`18334`.
+- Monkey patched ``django.db.backends.util.CursorWrapper`` to allow using cursors as ContextManagers in Python 2.7. :djangoticket:`17671`.
