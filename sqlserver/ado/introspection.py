@@ -49,6 +49,39 @@ class DatabaseIntrospection(BaseSqlDatabaseIntrospection):
             'varchar': ado_consts.adVarChar,
         }.get(datatype.lower(), None)
 
+    def get_table_description(self, cursor, table_name, identity_check=True):
+        """Return a description of the table, with DB-API cursor.description interface.
+
+        The 'auto_check' parameter has been added to the function argspec.
+        If set to True, the function will check each of the table's fields for the
+        IDENTITY property (the IDENTITY property is the MSSQL equivalent to an AutoField).
+
+        When a field is found with an IDENTITY property, it is given a custom field number
+        of SQL_AUTOFIELD, which maps to the 'AutoField' value in the DATA_TYPES_REVERSE dict.
+        """
+        table_field_type_map = self._get_table_field_type_map(cursor, table_name)
+
+        cursor.execute("SELECT * FROM [%s] where 1=0" % (table_name))
+        columns = cursor.description
+
+        items = list()
+        for column in columns:
+            column = list(column) # Convert tuple to list
+            # fix data type
+            column[1] = self._datatype_to_ado_type(table_field_type_map.get(column[0]))
+
+            if identity_check and self._is_auto_field(cursor, table_name, column[0]):
+                if column[1] == ado_consts.adBigInt:
+                    column[1] = BIG_AUTO_FIELD_MARKER
+                else:
+                    column[1] = AUTO_FIELD_MARKER
+
+            if column[1] == MONEY_FIELD_MARKER:
+                # force decimal_places=4 to match data type. Cursor description thinks this column is a string
+                column[5] = 4
+            items.append(column)
+        return items
+
     data_types_reverse = {
         AUTO_FIELD_MARKER: 'AutoField',
         BIG_AUTO_FIELD_MARKER: 'sqlserver_ado.fields.BigAutoField',
