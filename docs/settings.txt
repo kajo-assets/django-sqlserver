@@ -1,0 +1,204 @@
+========
+Settings
+========
+
+.. setting:: DATABASES
+
+DATABASES
+---------
+
+Please see the `Django documentation on DATABASES settings`_ for a complete 
+list of available settings. `Django-mssql` builds upon these settings.
+ 
+ .. _`Django documentation on DATABASES settings`: https://docs.djangoproject.com/en/1.4/ref/settings/#databases
+ 
+ 
+This is an example of a typical configuration::
+
+    DATABASES = {
+        'default': {
+            'NAME': 'my_database',
+            'ENGINE': 'sqlserver_ado',
+            'HOST': 'dbserver\\ss2008',
+            'USER': '',
+            'PASSWORD': '',
+        }
+    }
+
+
+.. setting:: ENGINE
+
+ENGINE
+~~~~~~
+
+This value must be set to ``sqlserver_ado``.
+
+.. setting:: HOST
+
+HOST
+~~~~
+
+Default: ``'127.0.0.1'``
+
+This defines the Microsoft SQL Server to establish a connection. This value 
+can be a hostname or IP address.
+
+.. setting:: PORT
+
+PORT
+~~~~
+
+Default: ``''`` (Empty string)
+
+This defines the network port to use when connecting to the server. If not 
+defined, the standard Microsoft SQL Server port will be used.
+
+.. setting:: NAME
+
+NAME
+~~~~
+
+This is the name of the SQL server database.
+
+.. setting:: USER
+
+USER
+~~~~
+
+Default: ``''`` (Empty string)
+
+This defines the name of the user to use when authenticating to the server.
+When empty, a trusted connection (SSPI) will be used.
+
+.. setting:: PASSWORD
+
+PASSWORD
+~~~~~~~~
+
+Default: ``''`` (Empty string)
+
+When a `USER`_ is defined, this field should be the plain text password 
+to use when authenticating.
+
+.. note::
+    Any user or service that can read the configuration file can 
+    will be able to see the plain-text password. Trusted connections are 
+    recommended.
+
+.. setting:: TEST_CREATE
+
+TEST_CREATE
+~~~~~~~~~~~
+
+Default: ``True``
+
+This setting is specific to the `django-mssql` backend and controls whether or not
+the test database will be created and destroyed during the test creation. This is useful
+when integrating to a legacy database with a complex schema that is created by another
+application or cannot be easily created by Django's syncdb.
+
+
+.. code:: python
+
+    DATABASES = {
+        'default': {
+            'NAME': 'test_legacy_database',
+            'HOST': r'servername\ss2008',
+            'TEST_NAME': 'test_legacy_database',
+            'TEST_CREATE': False,
+        }
+    }
+
+.. note::
+
+    This is not intended to allow you to run tests against a QA, staging, or production database.
+
+.. setting:: OPTIONS
+
+OPTIONS
+-------
+
+``Django-mssql`` provides a few extra ``OPTIONS`` that are specific to this
+backend. Please note that while the main database settings are UPPERCASE
+keys, the ``OPTIONS`` dictionary keys are expected to be lowercase (due to
+legacy reasons).
+
+.. setting:: use_mars
+
+use_mars
+~~~~~~~~
+
+Default: ``True``
+
+Set to ``False`` to disable `Multiple Active Recordsets`. It is not recommended 
+to disable MARS. Without MARS enabled, you will probably end up seeing the error
+"Cannot create new connection because in manual or distributed transaction mode".
+
+.. note::
+    This doesn't really work properly with the "SQLOLEDB" provider.
+
+
+.. _`extra_params`: OPTIONS-EXTRA_PARAMS
+
+.. setting:: extra_params
+
+extra_params
+~~~~~~~~~~~~
+
+Default: ``''`` (Empty string)
+
+This value will be appended to the generated connection string. Use this to
+provide any specific connection settings that are not controllable with the
+other settings.
+
+.. setting:: provider
+
+provider
+~~~~~~~~
+
+Default: ``'SQLCLI10'``
+
+The SQL provider to use when connecting to the database. If this doesn't work, 
+try 'SQLCLI11' or 'SQLOLEDB'.
+
+.. note::
+    ``use_mars = True`` doesn't always work properly with 'SQLOLEDB' and can result in the error 
+    "Cannot create new connection because in manual or distributed transaction mode."
+    if you try to filter a queryset with another queryset.
+
+.. setting:: disable_avg_cast
+
+disable_avg_cast
+~~~~~~~~~~~~~~~~
+
+Default: ``False``
+
+This backend will automatically ``CAST`` fields used by the `AVG function`_ 
+as ``FLOAT`` to match the behavior of the core database backends. Set this
+to ``True`` if you need SQL server to retain the datatype of fields used
+with ``AVG``.
+
+.. versionadded:: 1.1
+
+.. _`AVG function`: http://msdn.microsoft.com/en-us/library/ms177677.aspx
+
+.. note::
+    SQL server maintains the datatype of the values used in ``AVG``. The
+    average of an ``int`` column will be an ``int``. With this option set
+    to ``True``, ``AVG([1,2])`` == 1, not 1.5.
+
+.. setting:: use_legacy_date_fields
+
+use_legacy_date_fields
+~~~~~~~~~~~~~~~~~~~~~~
+
+Default: ``True``
+
+This setting alters which data types are used for the ``DateField``, 
+``DateTimeField``, and ``TimeField`` fields. When ``True``, the fields will all 
+use the ``datetime`` data type. When ``False``, they will use ``date``, 
+``datetime``, and ``time`` data types.
+
+
+
+.. versionadded:: 1.4
