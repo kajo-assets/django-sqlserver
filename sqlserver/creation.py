@@ -18,6 +18,7 @@ class DatabaseCreation(BaseDatabaseCreation):
         'CommaSeparatedIntegerField':   'nvarchar(%(max_length)s)',
         'DateField':                    'date',
         'DateTimeField':                'datetime2',
+        'DateTimeOffsetField':          'datetimeoffset',
         'DecimalField':                 'decimal(%(max_digits)s, %(decimal_places)s)',
         'FileField':                    'nvarchar(%(max_length)s)',
         'FilePathField':                'nvarchar(%(max_length)s)',
@@ -40,15 +41,15 @@ class DatabaseCreation(BaseDatabaseCreation):
         'BinaryField':                  'varbinary(max)',
     }
 
-    def _enable_legacy_date_fields(self):
-        """
-        Revert date related data_types to SQL 2005 compatible values.
-        """
-        self.data_types.update({
-            'DateField': 'datetime',
-            'DateTimeField': 'datetime',
-            'TimeField': 'datetime',
-        })
+    def __init__(self, *args, **kwargs):
+        super(DatabaseCreation, self).__init__(*args, **kwargs)
+
+        if self.connection.use_legacy_date_fields:
+            self.data_types.update({
+                'DateField': 'datetime',
+                'DateTimeField': 'datetime',
+                'TimeField': 'datetime',
+            })
 
     def _create_master_connection(self):
         """
@@ -84,6 +85,11 @@ class DatabaseCreation(BaseDatabaseCreation):
         try:
             super(DatabaseCreation, self)._create_test_db(verbosity, autoclobber)
             self.install_regex(test_database_name)
+        except Exception as e:
+            if 'Choose a different database name.' in str(e):
+                print 'Database "%s" could not be created because it already exists.' % test_database_name
+            else:
+                raise
         finally:
             # set thing back
             self.connection.close()
@@ -132,6 +138,11 @@ class DatabaseCreation(BaseDatabaseCreation):
 
         try:
             super(DatabaseCreation, self)._destroy_test_db(test_database_name, verbosity)
+        except Exception as e:
+            if 'it is currently in use' in str(e):
+                print 'Cannot drop database %s because it is in use' % test_database_name
+            else:
+                raise
         finally:
             self.connection = old_wrapper
 

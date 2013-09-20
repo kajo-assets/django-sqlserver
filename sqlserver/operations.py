@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import datetime
 import django
 import django.core.exceptions
@@ -15,6 +17,7 @@ except ImportError:
 
 from django.utils import timezone
 
+from . import fields as mssql_fields
 
 def total_seconds(td):
     if hasattr(td, 'total_seconds'):
@@ -25,6 +28,33 @@ def total_seconds(td):
 
 class DatabaseOperations(BaseDatabaseOperations):
     compiler_module = "sqlserver.compiler"
+
+    _convert_values_map = {
+        # custom fields
+        'DateTimeOffsetField':  mssql_fields.DateTimeOffsetField(),
+        'LegacyDateField':      mssql_fields.LegacyDateField(),
+        'LegacyDateTimeField':  mssql_fields.LegacyDateTimeField(),
+        'LegacyTimeField':      mssql_fields.LegacyTimeField(),
+        'NewDateField':         mssql_fields.DateField(),
+        'NewDateTimeField':     mssql_fields.DateTimeField(),
+        'NewTimeField':         mssql_fields.TimeField(),
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(DatabaseOperations, self).__init__(*args, **kwargs)
+
+        if self.connection.use_legacy_date_fields:
+            self._convert_values_map.update({
+                'DateField':        self._convert_values_map['LegacyDateField'],
+                'DateTimeField':    self._convert_values_map['LegacyDateTimeField'],
+                'TimeField':        self._convert_values_map['LegacyTimeField'],
+            })
+        else:
+            self._convert_values_map.update({
+                'DateField':        self._convert_values_map['NewDateField'],
+                'DateTimeField':    self._convert_values_map['NewDateTimeField'],
+                'TimeField':        self._convert_values_map['NewTimeField'],
+            })
 
     def cache_key_culling_sql(self):
         return """
@@ -235,7 +265,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             else:
                 raise ValueError("SQL Server backend does not support timezone-aware datetimes.")
 
-        if not self.features.supports_microsecond_precision:
+        if not self.connection.features.supports_microsecond_precision:
             value = value.replace(microsecond=0)
         return value
 
@@ -243,7 +273,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         if self.connection._is_sql2008_and_up(self.connection.connection):
             return value
 
-        if timezone.is_aware(value):
+        if timezone.is_aware(value) and not self.connection.features.supports_timezones:
+            if not getattr(settings, 'USE_TZ', False) and hasattr(value, 'astimezone'):
+                value = value.astimezone(timezone.utc).replace(tzinfo=None)
             raise ValueError("SQL Server backend does not support timezone-aware times.")
 
         # MS SQL 2005 doesn't support microseconds
@@ -286,16 +318,12 @@ class DatabaseOperations(BaseDatabaseOperations):
         """
         MSSQL needs help with date fields that might come out as strings.
         """
-        internal_type = field.get_internal_type()
-        if internal_type in ('DateField', 'DateTimeField', 'TimeField'):
-            compiler = self.compiler('SQLCompiler')
-            if internal_type == 'DateTimeField':
-                return compiler._datetime_field.to_python(value)
-            elif internal_type == 'DateField':
-                return compiler._date_field.to_python(value)
-            elif internal_type == 'TimeField':
-                return compiler._time_field.to_python(value)
-        return super(DatabaseOperations, self).convert_values(value, field)
+        if field:
+            internal_type = field.get_internal_type()
+            if internal_type in self._convert_values_map:
+                return self._convert_values_map[internal_type].to_python(value)
+            return super(DatabaseOperations, self).convert_values(value, field)
+        return value
 
     def bulk_insert_sql(self, fields, num_values):
         """

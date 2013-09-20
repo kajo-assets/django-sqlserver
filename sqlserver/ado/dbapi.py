@@ -214,14 +214,22 @@ def _configure_parameter(p, value):
             p.NumericScale = 0
             p.Precision = digit_count + exponent
 
-    elif isinstance(value, datetime.time):
-            if getattr(settings, 'USE_TZ', False) and value.tzinfo:
-                value = value.astimezone(timezone.utc)
-            p.Value = datetime.datetime(1,1,1, value.hour, value.minute, value.second)
     elif isinstance(value, datetime.datetime):
-            if getattr(settings, 'USE_TZ', False) and value.tzinfo:
-                value = value.astimezone(timezone.utc)
-            p.Value = value
+        if getattr(settings, 'USE_TZ', False) and value.tzinfo:
+            value = value.astimezone(timezone.utc)
+        p.Type = adBSTR
+        s = value.isoformat(' ')
+        p.Value = s
+        p.Size = len(s)
+
+    elif isinstance(value, datetime.time):
+        if getattr(settings, 'USE_TZ', False) and value.tzinfo:
+            value = value.astimezone(timezone.utc)
+        p.Type = adBSTR
+        s = value.isoformat()
+        p.Value = s
+        p.Size = len(s)
+
     else:
         # For any other type, set the value and let pythoncom do the right thing.
         p.Value = value

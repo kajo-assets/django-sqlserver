@@ -77,14 +77,6 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
     def __init__(self, *args, **kwargs):
         super(SqlServerBaseWrapper, self).__init__(*args, **kwargs)
 
-        self.features = DatabaseFeatures(self)
-        autocommit = self.settings_dict["OPTIONS"].get("autocommit", False)
-        self.features.uses_autocommit = autocommit
-        self.ops = DatabaseOperations(self)
-        self.client = BaseDatabaseClient(self)
-        self.creation = DatabaseCreation(self)
-        self.validation = BaseDatabaseValidation(self)
-
         try:
             self.command_timeout = int(self.settings_dict.get('COMMAND_TIMEOUT', 30))
         except ValueError:
@@ -96,20 +88,19 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         except ValueError:
             self.cast_avg_to_float = False
 
-        self.ops.features = self.features
-
         USE_LEGACY_DATE_FIELDS_DEFAULT = True
         try:
-            use_legacy_date_fields = bool(options.get('use_legacy_date_fields', USE_LEGACY_DATE_FIELDS_DEFAULT))
+            self.use_legacy_date_fields = bool(options.get('use_legacy_date_fields', USE_LEGACY_DATE_FIELDS_DEFAULT))
         except ValueError:
-            use_legacy_date_fields = USE_LEGACY_DATE_FIELDS_DEFAULT
+            self.use_legacy_date_fields = USE_LEGACY_DATE_FIELDS_DEFAULT
 
-        if use_legacy_date_fields:
-            self.creation._enable_legacy_date_fields()
-
-        self.ops.is_sql2000 = self.is_sql2000
-        self.ops.is_sql2005 = self.is_sql2005
-        self.ops.is_sql2008 = self.is_sql2008
+        self.features = DatabaseFeatures(self)
+        autocommit = self.settings_dict["OPTIONS"].get("autocommit", False)
+        self.features.uses_autocommit = autocommit
+        self.ops = DatabaseOperations(self)
+        self.client = BaseDatabaseClient(self)
+        self.creation = DatabaseCreation(self)
+        self.validation = BaseDatabaseValidation(self)
 
     if not hasattr(BaseDatabaseWrapper, '_cursor'):
         # support for django 1.5 and previous
