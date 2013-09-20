@@ -30,7 +30,7 @@ import sys
 import time
 import datetime
 import re
-import six
+from django.utils import six
 
 try:
     import decimal

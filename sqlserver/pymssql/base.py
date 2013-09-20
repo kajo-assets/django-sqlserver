@@ -1,5 +1,5 @@
 import sys
-import six
+from django.utils import six
 from django.conf import settings
 from django.db import utils
 from django.db.backends.signals import connection_created

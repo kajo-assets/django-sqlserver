@@ -131,7 +131,4 @@ setup(
         'Topic :: Database',
     ],
     zip_safe=False,
-    install_requires=[
-        'six',
-    ],
 )

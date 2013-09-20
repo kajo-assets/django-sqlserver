@@ -1,4 +1,4 @@
-import six
+from django.utils import six
 from django.db.backends.schema import BaseDatabaseSchemaEditor
 
 __author__ = 'denisenk'

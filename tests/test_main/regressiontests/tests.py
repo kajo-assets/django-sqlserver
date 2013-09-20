@@ -8,8 +8,8 @@ from django.db import models, connection
 from django.utils import unittest
 from django.test import TestCase
 from django.utils.safestring import mark_safe
-import six
-from six.moves import xrange
+from django.utils import six
+from django.utils.six.moves import xrange
 
 from regressiontests.models import *
 
