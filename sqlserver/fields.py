@@ -83,7 +83,7 @@ class DateTimeField(models.DateTimeField):
 
     def get_db_prep_value(self, value, connection, prepared=False):
         val = super(DateTimeField, self).get_db_prep_value(value, connection, prepared)
-        return connection.ops._new_value_to_db_datetime(val)
+        return connection.ops.value_to_db_datetime(val)
 
 class DateTimeOffsetField(models.DateTimeField):
     """
@@ -113,7 +113,7 @@ class TimeField(models.TimeField):
 
     def get_db_prep_value(self, value, connection, prepared=False):
         val = super(TimeField, self).get_db_prep_value(value, connection, prepared)
-        return connection.ops._new_value_to_db_time(val)
+        return connection.ops.value_to_db_time(val)
 
 class LegacyDateField(models.DateField):
     """
@@ -140,7 +140,7 @@ class LegacyDateTimeField(models.DateTimeField):
 
     def get_db_prep_value(self, value, connection, prepared=False):
         val = super(LegacyDateTimeField, self).get_db_prep_value(value, connection, prepared)
-        return connection.ops._legacy_value_to_db_datetime(val)
+        return connection.ops.value_to_db_datetime(val)
 
 class LegacyTimeField(models.TimeField):
     """
@@ -157,4 +157,4 @@ class LegacyTimeField(models.TimeField):
   
     def get_db_prep_value(self, value, connection, prepared=False):
         val = super(LegacyTimeField, self).get_db_prep_value(value, connection, prepared)
-        return connection.ops._legacy_value_to_db_time(val)
+        return connection.ops.value_to_db_time(val)
