@@ -262,5 +262,5 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         pass
 
     def schema_editor(self):
-        "Returns a new instance of this backend's SchemaEditor"
+        """Returns a new instance of this backend's SchemaEditor"""
         return DatabaseSchemaEditor(self)

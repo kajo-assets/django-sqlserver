@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 import django
 from django.db.models.sql import compiler
-import datetime
 import re
 from itertools import chain, repeat
 
@@ -44,17 +43,21 @@ _re_data_type_terminator = re.compile(
 # Pattern used in column aliasing to find sub-select placeholders
 _re_col_placeholder = re.compile(r'\{_placeholder_(\d+)\}')
 
+
 def _break(s, find):
     """Break a string s into the part before the substring to find, 
     and the part including and after the substring."""
     i = s.find(find)
     return s[:i], s[i:]
 
+
 def _get_order_limit_offset(sql):
     return _re_order_limit_offset.search(sql).groups()
-    
+
+
 def _remove_order_limit_offset(sql):
-    return _re_order_limit_offset.sub('',sql).split(None, 1)[1]
+    return _re_order_limit_offset.sub('', sql).split(None, 1)[1]
+
 
 class SQLCompiler(compiler.SQLCompiler):
     def __pad_fields_with_aggregates(self, fields):
@@ -193,8 +196,7 @@ class SQLCompiler(compiler.SQLCompiler):
             else:
                 col = x
             f.append('{0}.{1}'.format(inner_table_name, col.strip()))
-        
-        
+
         # inject a subselect to get around OVER requiring ORDER BY to come from FROM
         inner_select = '{fields} FROM ( SELECT {inner} ) AS {inner_as}'.format(
             fields=', '.join(f),
