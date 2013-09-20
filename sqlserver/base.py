@@ -17,7 +17,7 @@ from .operations import DatabaseOperations
 try:
     from .schema import DatabaseSchemaEditor
 except ImportError:
-    pass
+    DatabaseSchemaEditor = None
 
 
 class DatabaseFeatures(BaseDatabaseFeatures):
@@ -76,8 +76,8 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         except ValueError:
             self.command_timeout = 30
 
+        options = self.settings_dict.get('OPTIONS', {})
         try:
-            options = self.settings_dict.get('OPTIONS', {})
             self.cast_avg_to_float = not bool(options.get('disable_avg_cast', False))
         except ValueError:
             self.cast_avg_to_float = False
@@ -109,7 +109,7 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
             def __exit__(self, type, value, traceback):
                 self.cursor.close()
 
-            def execute(self, sql, params = ()):
+            def execute(self, sql, params=()):
                 try:
                     return self.cursor.execute(sql, params)
                 except self.database.IntegrityError as e:
