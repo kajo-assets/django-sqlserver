@@ -1,6 +1,7 @@
 from ..introspection import BaseSqlDatabaseIntrospection
 import pytds
 
+
 class DatabaseIntrospection(BaseSqlDatabaseIntrospection):
     data_types_reverse = {
         #'AUTO_FIELD_MARKER': 'AutoField',
