@@ -25,7 +25,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_bulk_insert = False
 
     supports_timezones = False
-    supports_sequence_reset = False
 
     can_return_id_from_insert = True
 
