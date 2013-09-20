@@ -27,6 +27,8 @@ class DatabaseCreation(BaseDatabaseCreation):
         'IntegerField':                 'int',
         'IPAddressField':               'nvarchar(15)',
         'LegacyDateTimeField':          'datetime',
+        'LegacyDateField':              'datetime',
+        'LegacyTimeField':              'datetime',
         'NewDateField':                 'date',
         'NewDateTimeField':             'datetime2',
         'NewTimeField':                 'time',

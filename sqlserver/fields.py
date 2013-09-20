@@ -120,7 +120,7 @@ class LegacyDateField(models.DateField):
     A DateField that is backed by a 'datetime' database field.
     """
     def get_internal_type(self):
-        return 'LegacyDateTimeField'
+        return 'LegacyDateField'
 
     def to_python(self, value):
         val = super(LegacyDateField, self).to_python(convert_microsoft_date_to_isoformat(value))
@@ -147,7 +147,7 @@ class LegacyTimeField(models.TimeField):
     A TimeField that is backed by a 'datetime' database field.
     """
     def get_internal_type(self):
-        return 'LegacyDateTimeField'
+        return 'LegacyTimeField'
 
     def to_python(self, value):
         val = super(LegacyTimeField, self).to_python(convert_microsoft_date_to_isoformat(value))
