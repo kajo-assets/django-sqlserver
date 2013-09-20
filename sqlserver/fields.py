@@ -93,7 +93,7 @@ class DateTimeOffsetField(models.DateTimeField):
         return 'DateTimeOffsetField'
 
     def to_python(self, value):
-        return super(DateTimeField, self).to_python(convert_microsoft_date_to_isoformat(value))
+        return super(DateTimeOffsetField, self).to_python(convert_microsoft_date_to_isoformat(value))
 
     def get_db_prep_value(self, value, connection, prepared=False):
         val = super(DateTimeOffsetField, self).get_db_prep_value(value, connection, prepared)
