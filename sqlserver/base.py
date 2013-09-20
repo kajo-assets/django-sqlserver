@@ -28,8 +28,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     can_return_id_from_insert = True
 
-    supports_regex_backreferencing = False
-
     # Disable test modeltests.lookup.tests.LookupTests.test_lookup_date_as_str
     supports_date_lookup_using_string = False
 
