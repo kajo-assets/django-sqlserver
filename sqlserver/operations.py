@@ -15,6 +15,14 @@ except ImportError:
 
 from django.utils import timezone
 
+
+def total_seconds(td):
+    if hasattr(td, 'total_seconds'):
+        return td.total_seconds()
+    else:
+        return td.days * 24 * 60 * 60 + td.seconds
+
+
 class DatabaseOperations(BaseDatabaseOperations):
     compiler_module = "sqlserver.compiler"
 
@@ -41,7 +49,7 @@ class DatabaseOperations(BaseDatabaseOperations):
                                            "but it isn't installed.")
             tz = pytz.timezone(tzname)
             td = tz.utcoffset(datetime.datetime(2000, 1, 1))
-            total_minutes = td.total_seconds() // 60
+            total_minutes = total_seconds(td) // 60
             hours, minutes = divmod(total_minutes, 60)
             tzoffset = "%+03d:%02d" % (hours, minutes)
             field_name = "CAST(SWITCHOFFSET(TODATETIMEOFFSET(%s, '+00:00'), '%s') AS DATETIME2)" % (field_name, tzoffset)
@@ -81,7 +89,7 @@ class DatabaseOperations(BaseDatabaseOperations):
                                            "but it isn't installed.")
             tz = pytz.timezone(tzname)
             td = tz.utcoffset(datetime.datetime(2000, 1, 1))
-            total_minutes = td.total_seconds() // 60
+            total_minutes = total_seconds(td) // 60
             hours, minutes = divmod(total_minutes, 60)
             tzoffset = "%+03d:%02d" % (hours, minutes)
             field_name = "CAST(SWITCHOFFSET(TODATETIMEOFFSET(%s, '+00:00'), '%s') AS DATETIME2)" % (field_name, tzoffset)
