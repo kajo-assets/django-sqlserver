@@ -283,7 +283,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         if value is None:
             return None
 
-        if not self.features.supports_microsecond_precision:
+        if not self.connection.features.supports_microsecond_precision:
             value = value.replace(microsecond=0)
         return value
 
@@ -300,7 +300,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         `value` is an int, containing the looked-up year.
         """
         first = datetime.datetime(value, 1, 1)
-        if self.features.supports_microsecond_precision:
+        if self.connection.features.supports_microsecond_precision:
             second = datetime.datetime(value, 12, 31, 23, 59, 59, 999999)
         else:
             second = datetime.datetime(value, 12, 31, 23, 59, 59, 997)
