@@ -83,7 +83,7 @@ class DatabaseIntrospection(BaseSqlDatabaseIntrospection):
         return items
 
     data_types_reverse = {
-        AUTO_FIELD_MARKER: 'AutoField',
+        AUTO_FIELD_MARKER: 'IntegerField',
         BIG_AUTO_FIELD_MARKER: 'sqlserver_ado.fields.BigAutoField',
         MONEY_FIELD_MARKER: 'DecimalField',
         ado_consts.adBoolean: 'BooleanField',
