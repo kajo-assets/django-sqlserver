@@ -87,7 +87,9 @@ class SQLCompiler(compiler.SQLCompiler):
         index_extra_select = len(self.query.extra_select)
         for value, field in zip(row[index_extra_select:], chain(fields, repeat(None))):
             if field:
-                value = self.connection.ops.convert_values(value, field)
+                internal_type = field.get_internal_type()
+                if internal_type in self.connection.ops._convert_values_map:
+                    value = self.connection.ops._convert_values_map[internal_type].to_python(value)
             values.append(value)
         return row[:index_extra_select] + tuple(values)
 
