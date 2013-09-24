@@ -77,8 +77,14 @@ class DateTimeField(models.DateTimeField):
         from django.conf import settings
         result = super(DateTimeField, self).to_python(convert_microsoft_date_to_isoformat(value))
         if result:
-            if timezone.is_aware(result) and not getattr(settings, 'USE_TZ', False):
-                result = result.astimezone(timezone.utc).replace(tzinfo=None)
+            if getattr(settings, 'USE_TZ', False):
+                if timezone.is_aware(result):
+                    result = result.astimezone(timezone.utc)
+                else:
+                    result = result.replace(tzinfo=timezone.utc)
+            else:
+                if timezone.is_aware(result):
+                    result = result.astimezone(timezone.utc).replace(tzinfo=None)
         return result
 
     def get_db_prep_value(self, value, connection, prepared=False):
