@@ -230,6 +230,12 @@ def _configure_parameter(p, value):
         p.Value = s
         p.Size = len(s)
 
+    elif isinstance(value, datetime.date):
+        p.Type = adBSTR
+        s = value.isoformat()
+        p.Value = s
+        p.Size = len(s)
+
     else:
         # For any other type, set the value and let pythoncom do the right thing.
         p.Value = value
