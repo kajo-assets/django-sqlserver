@@ -311,8 +311,13 @@ class Connection(object):
     def rollback(self):
         """Abort a pending transaction."""
         self.messages = []
-        if not self.supportsTransactions:
-            self._raiseConnectionError(NotSupportedError, None)
+        #if not self.supportsTransactions:
+        #    self._raiseConnectionError(NotSupportedError, None)
+        with self.cursor() as cursor:
+            cursor.execute("select @@TRANCOUNT")
+            trancount, = cursor.fetchone()
+        if trancount == 0:
+            return
 
         self.adoConn.RollbackTrans()
         if not(self.adoConn.Attributes & adXactAbortRetaining):
