@@ -385,7 +385,7 @@ class DateTestCase(TestCase):
     def test_new_time(self):
         self._test(TimeTable, datetime.time(13, 13, 59, 123456))
 
-    #def test_datetimeoffset(self):
-    #    from django.utils import timezone
-    #    val = timezone.make_aware(datetime.datetime.now(), timezone.get_default_timezone())
-    #    self._test(DateTimeOffsetTable, val)
+    def test_datetimeoffset(self):
+        from django.utils import timezone
+        val = timezone.make_aware(datetime.datetime.now(), timezone.LocalTimezone())
+        self._test(DateTimeOffsetTable, val)

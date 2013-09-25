@@ -259,7 +259,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         if value is None:
             return None
 
-        if timezone.is_aware(value):
+        if timezone.is_aware(value):# and not self.connection.features.supports_timezones:
             if getattr(settings, 'USE_TZ', False):
                 value = value.astimezone(timezone.utc).replace(tzinfo=None)
             else:
@@ -273,10 +273,11 @@ class DatabaseOperations(BaseDatabaseOperations):
         if self.connection._is_sql2008_and_up(self.connection.connection):
             return value
 
-        if timezone.is_aware(value) and not self.connection.features.supports_timezones:
+        if timezone.is_aware(value):
             if not getattr(settings, 'USE_TZ', False) and hasattr(value, 'astimezone'):
-                value = value.astimezone(timezone.utc).replace(tzinfo=None)
-            raise ValueError("SQL Server backend does not support timezone-aware times.")
+                value = timezone.make_naive(value, timezone.utc)
+            else:
+                raise ValueError("SQL Server backend does not support timezone-aware times.")
 
         # MS SQL 2005 doesn't support microseconds
         #...but it also doesn't really suport bare times
@@ -321,8 +322,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         if field:
             internal_type = field.get_internal_type()
             if internal_type in self._convert_values_map:
-                return self._convert_values_map[internal_type].to_python(value)
-            return super(DatabaseOperations, self).convert_values(value, field)
+                value = self._convert_values_map[internal_type].to_python(value)
+            else:
+                value = super(DatabaseOperations, self).convert_values(value, field)
         return value
 
     def bulk_insert_sql(self, fields, num_values):

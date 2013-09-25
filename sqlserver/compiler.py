@@ -1,5 +1,10 @@
 from __future__ import absolute_import
 
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
+
 import django
 from django.db.models.sql import compiler
 import re
@@ -85,7 +90,8 @@ class SQLCompiler(compiler.SQLCompiler):
             row = row[1:]
         values = []
         index_extra_select = len(self.query.extra_select)
-        for value, field in zip(row[index_extra_select:], chain(fields, repeat(None))):
+        for value, field in zip_longest(row[index_extra_select:], fields):
+            # print '\tfield=%s\tvalue=%s' % (repr(field), repr(value))
             if field:
                 internal_type = field.get_internal_type()
                 if internal_type in self.connection.ops._convert_values_map:
