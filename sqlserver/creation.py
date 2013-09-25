@@ -89,7 +89,7 @@ class DatabaseCreation(BaseDatabaseCreation):
             self.install_regex(test_database_name)
         except Exception as e:
             if 'Choose a different database name.' in str(e):
-                print 'Database "%s" could not be created because it already exists.' % test_database_name
+                six.print_('Database "%s" could not be created because it already exists.' % test_database_name)
             else:
                 raise
         finally:
@@ -142,7 +142,7 @@ class DatabaseCreation(BaseDatabaseCreation):
             super(DatabaseCreation, self)._destroy_test_db(test_database_name, verbosity)
         except Exception as e:
             if 'it is currently in use' in str(e):
-                print 'Cannot drop database %s because it is in use' % test_database_name
+                six.print_('Cannot drop database %s because it is in use' % test_database_name)
             else:
                 raise
         finally:
