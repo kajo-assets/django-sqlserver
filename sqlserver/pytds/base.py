@@ -7,20 +7,21 @@ except:
 try:
     import pytds
 except ImportError:
+    pytds = None
     raise Exception('pytds is not available, run pip install python-tds to fix this')
 
-from sqlserver.base import (
-    SqlServerBaseWrapper,
-    )
+from sqlserver.base import SqlServerBaseWrapper
 
 from .introspection import DatabaseIntrospection
 
 Database = pytds
 
+
 def utc_tzinfo_factory(offset):
     if offset != 0:
         raise AssertionError("database connection isn't set to UTC")
     return utc
+
 
 class DatabaseWrapper(SqlServerBaseWrapper):
     Database = pytds
@@ -51,7 +52,7 @@ class DatabaseWrapper(SqlServerBaseWrapper):
             'use_mars': options.get('use_mars', False),
             'load_balancer': options.get('load_balancer', None),
             'use_tz': utc if getattr(settings, 'USE_TZ', False) else None,
-            }
+        }
         return conn_params
 
     def _get_new_connection(self, conn_params):

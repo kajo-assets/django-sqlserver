@@ -1,9 +1,14 @@
+from __future__ import absolute_import
+
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
+
+import django
 from django.db.models.sql import compiler
-import datetime
 import re
 from itertools import chain, repeat
-
-from contextlib import contextmanager
 
 # query_class returns the base class to use for Django queries.
 # The custom 'SqlServerQuery' class derives from django.db.models.sql.query.Query
@@ -43,45 +48,55 @@ _re_data_type_terminator = re.compile(
 # Pattern used in column aliasing to find sub-select placeholders
 _re_col_placeholder = re.compile(r'\{_placeholder_(\d+)\}')
 
+
 def _break(s, find):
     """Break a string s into the part before the substring to find, 
     and the part including and after the substring."""
     i = s.find(find)
     return s[:i], s[i:]
 
+
 def _get_order_limit_offset(sql):
     return _re_order_limit_offset.search(sql).groups()
-    
-def _remove_order_limit_offset(sql):
-    return _re_order_limit_offset.sub('',sql).split(None, 1)[1]
 
-@contextmanager
-def prevent_ordering_query(compiler_):
-    try:
-        setattr(query, '_mssql_ordering_not_allowed', True)
-        yield
-    finally:
-        delattr(query, '_mssql_ordering_not_allowed')
+
+def _remove_order_limit_offset(sql):
+    return _re_order_limit_offset.sub('', sql).split(None, 1)[1]
+
 
 class SQLCompiler(compiler.SQLCompiler):
+    def __pad_fields_with_aggregates(self, fields):
+        """
+        Fix for Django ticket #21126 backported to Django 1.5-1.5.4
+        """
+        if django.VERSION[:2] == (1, 5) and django.VERSION[2] <= 5:
+            if not bool(self.query.aggregate_select):
+                return fields
+            aggregate_start = len(self.query.extra_select) + len(self.query.select)
+            aggregate_end = aggregate_start + len(self.query.aggregate_select)
+
+            # pad None in to fields for aggregates
+            return fields[:aggregate_start] + [
+                None for x in range(0, aggregate_end - aggregate_start)
+            ] + fields[aggregate_start:]
+        return fields
+
     def resolve_columns(self, row, fields=()):
+        fields = self.__pad_fields_with_aggregates(fields)
+
         # If the results are sliced, the resultset will have an initial 
         # "row number" column. Remove this column before the ORM sees it.
         if getattr(self, '_using_row_number', False):
             row = row[1:]
-       
         values = []
         index_extra_select = len(self.query.extra_select)
-        for value, field in zip(row[index_extra_select:], chain(fields, repeat(None))):
+        for value, field in zip_longest(row[index_extra_select:], fields):
+            # print '\tfield=%s\tvalue=%s' % (repr(field), repr(value))
             if field:
-                if isinstance(value, datetime.datetime):
-                    internal_type = field.get_internal_type()
-                    if internal_type == 'DateField':
-                        value = value.date()
-                    elif internal_type == 'TimeField':
-                        value = value.time()
+                internal_type = field.get_internal_type()
+                if internal_type in self.connection.ops._convert_values_map:
+                    value = self.connection.ops._convert_values_map[internal_type].to_python(value)
             values.append(value)
-
         return row[:index_extra_select] + tuple(values)
 
     def _fix_aggregates(self):
@@ -126,10 +141,12 @@ class SQLCompiler(compiler.SQLCompiler):
             # The ORDER BY clause is invalid in views, inline functions, 
             # derived tables, subqueries, and common table expressions, 
             # unless TOP or FOR XML is also specified.
-            self.query._mssql_ordering_not_allowed = with_col_aliases
-            result = super(SQLCompiler, self).as_sql(with_limits, with_col_aliases)
-            # remove in case query is every reused
-            delattr(self.query, '_mssql_ordering_not_allowed')            
+            try:
+                setattr(self.query, '_mssql_ordering_not_allowed', with_col_aliases)
+                result = super(SQLCompiler, self).as_sql(with_limits, with_col_aliases)
+            finally:
+                # remove in case query is every reused
+                delattr(self.query, '_mssql_ordering_not_allowed')
             return result
 
         raw_sql, fields = super(SQLCompiler, self).as_sql(False, with_col_aliases)
@@ -187,8 +204,7 @@ class SQLCompiler(compiler.SQLCompiler):
             else:
                 col = x
             f.append('{0}.{1}'.format(inner_table_name, col.strip()))
-        
-        
+
         # inject a subselect to get around OVER requiring ORDER BY to come from FROM
         inner_select = '{fields} FROM ( SELECT {inner} ) AS {inner_as}'.format(
             fields=', '.join(f),

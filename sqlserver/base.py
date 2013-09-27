@@ -3,7 +3,7 @@ from django.db import utils
 from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseValidation, BaseDatabaseClient
 from django.db.backends.signals import connection_created
 from django.utils.functional import cached_property
-import six
+from django.utils import six
 import sys
 
 try:
@@ -17,7 +17,7 @@ from .operations import DatabaseOperations
 try:
     from .schema import DatabaseSchemaEditor
 except ImportError:
-    pass
+    DatabaseSchemaEditor = None
 
 
 class DatabaseFeatures(BaseDatabaseFeatures):
@@ -25,14 +25,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_bulk_insert = False
 
     supports_timezones = False
-    supports_sequence_reset = False
 
     can_return_id_from_insert = True
-
-    supports_regex_backreferencing = False
-
-    # Disable test modeltests.lookup.tests.LookupTests.test_lookup_date_as_str
-    supports_date_lookup_using_string = False
 
     supports_tablespaces = True
 
@@ -40,8 +34,12 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     allows_group_by_pk = False
     allows_group_by_ordinal = False
     supports_microsecond_precision = False
-    supports_subqueries_in_group_by = False
     allow_sliced_subqueries = False
+
+    can_introspect_autofield = True
+
+    supports_subqueries_in_group_by = False
+
     uses_savepoints = True
     supports_paramstyle_pyformat = False
     supports_transactions = True
@@ -73,6 +71,23 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
     def __init__(self, *args, **kwargs):
         super(SqlServerBaseWrapper, self).__init__(*args, **kwargs)
 
+        try:
+            self.command_timeout = int(self.settings_dict.get('COMMAND_TIMEOUT', 30))
+        except ValueError:
+            self.command_timeout = 30
+
+        options = self.settings_dict.get('OPTIONS', {})
+        try:
+            self.cast_avg_to_float = not bool(options.get('disable_avg_cast', False))
+        except ValueError:
+            self.cast_avg_to_float = False
+
+        USE_LEGACY_DATE_FIELDS_DEFAULT = True
+        try:
+            self.use_legacy_date_fields = bool(options.get('use_legacy_date_fields', USE_LEGACY_DATE_FIELDS_DEFAULT))
+        except ValueError:
+            self.use_legacy_date_fields = USE_LEGACY_DATE_FIELDS_DEFAULT
+
         self.features = DatabaseFeatures(self)
         autocommit = self.settings_dict["OPTIONS"].get("autocommit", False)
         self.features.uses_autocommit = autocommit
@@ -80,22 +95,6 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         self.client = BaseDatabaseClient(self)
         self.creation = DatabaseCreation(self)
         self.validation = BaseDatabaseValidation(self)
-
-        try:
-            self.command_timeout = int(self.settings_dict.get('COMMAND_TIMEOUT', 30))
-        except ValueError:
-            self.command_timeout = 30
-
-        try:
-            options = self.settings_dict.get('OPTIONS', {})
-            self.cast_avg_to_float = not bool(options.get('disable_avg_cast', False))
-        except ValueError:
-            self.cast_avg_to_float = False
-
-        self.ops.features = self.features
-        self.ops.is_sql2000 = self.is_sql2000
-        self.ops.is_sql2005 = self.is_sql2005
-        self.ops.is_sql2008 = self.is_sql2008
 
     if not hasattr(BaseDatabaseWrapper, '_cursor'):
         # support for django 1.5 and previous
@@ -110,7 +109,7 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
             def __exit__(self, type, value, traceback):
                 self.cursor.close()
 
-            def execute(self, sql, params = ()):
+            def execute(self, sql, params=()):
                 try:
                     return self.cursor.execute(sql, params)
                 except self.database.IntegrityError as e:
@@ -158,8 +157,8 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
             # only pytds support new sql server date types
             supports_new_date_types = self._is_sql2008_and_up(conn)
             self.features.supports_microsecond_precision = supports_new_date_types
-            if supports_new_date_types:
-                self.creation._patch_for_sql2008_and_up()
+            if not supports_new_date_types:
+                self.creation._enable_legacy_date_fields()
         if self.settings_dict["OPTIONS"].get("allow_nulls_in_unique_constraints", True):
             self.features.ignores_nulls_in_unique_constraints = self._is_sql2008_and_up(conn)
             if self._is_sql2008_and_up(conn):
@@ -263,5 +262,5 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
         pass
 
     def schema_editor(self):
-        "Returns a new instance of this backend's SchemaEditor"
+        """Returns a new instance of this backend's SchemaEditor"""
         return DatabaseSchemaEditor(self)

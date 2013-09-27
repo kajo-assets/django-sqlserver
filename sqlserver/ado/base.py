@@ -1,7 +1,6 @@
 import sys
 from django.db import utils
 from django.core.exceptions import ImproperlyConfigured, ValidationError
-import six
 from . import dbapi as Database
 adodb = Database
 

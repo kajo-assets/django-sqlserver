@@ -20,7 +20,7 @@ fi
 if [ $BACKEND = sqlserver.pymssql ]; then
     python env/bin/pip install cython hg+https://denisenkom@code.google.com/r/denisenkom-pymssql/ --use-mirrors
 fi
-python env/bin/pip install pytz --use-mirrors
+python env/bin/pip install pytz==2013d --use-mirrors
 export COMPUTERNAME=$HOST
 python tests/test_main/manage.py test --noinput
 #python tests/test_regex_compare/manage.py test --noinput

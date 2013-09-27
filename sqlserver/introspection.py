@@ -1,4 +1,10 @@
+from __future__ import absolute_import
+
 from django.db.backends import BaseDatabaseIntrospection
+
+AUTO_FIELD_MARKER = -1000
+BIG_AUTO_FIELD_MARKER = -1001
+MONEY_FIELD_MARKER = -1002
 
 class BaseSqlDatabaseIntrospection(BaseDatabaseIntrospection):
     def get_table_list(self, cursor):
@@ -17,6 +23,15 @@ class BaseSqlDatabaseIntrospection(BaseDatabaseIntrospection):
         cursor.execute(sql)
         return cursor.fetchone()[0]
 
+    def _get_table_field_type_map(self, cursor, table_name):
+        """
+        Return a dict mapping field name to data type. DB-API cursor description 
+        interprets the date columns as chars.
+        """
+        cursor.execute('SELECT [COLUMN_NAME], [DATA_TYPE] FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] LIKE \'%s\'' % table_name)
+        results = dict(cursor.fetchall())
+        return results
+
     def get_table_description(self, cursor, table_name, identity_check=True):
         """Return a description of the table, with DB-API cursor.description interface.
 
@@ -33,8 +48,6 @@ class BaseSqlDatabaseIntrospection(BaseDatabaseIntrospection):
         items = list()
         for column in columns:
             column = list(column) # Convert tuple to list
-            #if identity_check and self._is_auto_field(cursor, table_name, column[0]):
-            #    column[1] = 'AUTO_FIELD_MARKER'
             items.append(column)
         return items
 
@@ -106,7 +119,6 @@ from
 	join sys.indexes IX on IX.object_id = T.object_id and IX.index_id = IC.index_id
 where
 	T.name = %s
-	--and (IX.is_unique=1 or IX.is_primary_key=1)
     -- Omit multi-column keys
 	and not exists (
 		select *

@@ -16,7 +16,7 @@ call git pull
 popd
 env\scripts\pip install -e ./pytds
 
-env\bin\pip install pytz --use-mirrors
+env\bin\pip install pytz==2013d --use-mirrors
 
 set COMPUTERNAME=%HOST%
 python tests\test_main\manage.py test --noinput
