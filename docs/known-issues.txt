@@ -1,0 +1,42 @@
+.. section: known-issues
+
+============
+Known Issues
+============
+
+.. _introspecting-percent-columns:
+
+Introspecting tables with '%' columns
+-------------------------------------
+
+Attempting to run ``manage.py inspectdb`` with ``DEBUG = True`` will raise 
+``TypeError: not enough arguments for format string``. This is due to ``CursorDebugWrapper``
+and its use of % format strings. If you encounter this problem, you can either rename
+the database column so it does not include a '%' (percent) character, or change ``DEBUG = False`` 
+in your settings when you run ``manage.py inspectdb``.
+
+.. _introspecting-custom-fields:
+
+Introspecting custom fields
+---------------------------
+
+Some datatypes will be mapped to a custom model field provided by 
+`Django-mssql`. If any of these fields are used, it will be necessary to add 
+``import sqlserver_ado.fields`` to the top of the models.py file. If using a
+version of Django prior to 1.7, it will be necessary to also remove the 
+"models." prefix from any of these custom fields. :djangoticket:`21090`
+
+.. _azure-clustered-indices:
+
+Azure requires clustered indices
+--------------------------------
+
+From http://msdn.microsoft.com/en-us/library/windowsazure/ee336245.aspx#cir
+
+	Windows Azure SQL Database does not support tables without clustered indexes. 
+	A table must have a clustered index. If a table is created without a clustered
+	constraint, a clustered index must be created before an insert operation is 
+	allowed on the table.
+
+The workaround is to dump the create SQL, add a clustered index, manually apply 
+the SQL to the database.
