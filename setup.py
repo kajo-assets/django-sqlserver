@@ -111,25 +111,24 @@ def find_package_data(
     return out
 
 setup(
-    name="django-mssql",
-    version=find_version("sqlserver_ado", "__init__.py"),
-    url='https://bitbucket.org/Manfre/django-mssql',
+    name="django-sqlserver",
+    version=find_version("sqlserver", "__init__.py"),
+    url='https://bitbucket.org/cramm/django-sqlserver',
     license='MIT',
     description="Django backend database support for MS SQL 2005 and up.",
     long_description=read('README.rst'),
-    author='Michael Manfre',
-    author_email='mmanfre@gmail.com',
+    author='Mikhail Denisenko',
+    author_email='denisenkom@gmail.com',
     packages=find_packages(),
     package_data=find_package_data(),
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 4 - Beta',
         'Framework :: Django',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.3',
         'Topic :: Internet :: WWW/HTTP',
+        'Topic :: Database',
     ],
     zip_safe=False,
-    install_requires=[
-    ],
 )

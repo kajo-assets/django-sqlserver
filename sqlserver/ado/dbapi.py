@@ -30,6 +30,7 @@ import sys
 import time
 import datetime
 import re
+from django.utils import six
 
 try:
     import decimal
@@ -147,7 +148,7 @@ def connect(connection_string, timeout=30, use_transactions=None):
         else:
             useTransactions = use_transactions
         return Connection(c, useTransactions)
-    except Exception, e:
+    except Exception as e:
         raise OperationalError(e, "Error opening connection: " + connection_string)
 
 def _use_transactions(c):
@@ -190,7 +191,7 @@ def _configure_parameter(p, value):
 
     if isinstance(value, basestring):
         p.Value = value
-        p.Size = len(value)
+        #p.Size = len(value)
 
     elif isinstance(value, buffer):
         p.Size = len(value)
@@ -214,12 +215,22 @@ def _configure_parameter(p, value):
             p.Precision = digit_count + exponent
 
     elif isinstance(value, datetime.datetime):
+        if getattr(settings, 'USE_TZ', False) and value.tzinfo:
+            value = value.astimezone(timezone.utc)
         p.Type = adBSTR
         s = value.isoformat(' ')
         p.Value = s
         p.Size = len(s)
 
     elif isinstance(value, datetime.time):
+        if getattr(settings, 'USE_TZ', False) and value.tzinfo:
+            value = value.astimezone(timezone.utc)
+        p.Type = adBSTR
+        s = value.isoformat()
+        p.Value = s
+        p.Size = len(s)
+
+    elif isinstance(value, datetime.date):
         p.Type = adBSTR
         s = value.isoformat()
         p.Value = s
@@ -245,6 +256,16 @@ class Connection(object):
             self.adoConn.IsolationLevel = defaultIsolationLevel
             self.adoConn.BeginTrans() # Disables autocommit per DBPAI
 
+    def set_autocommit(self, value):
+        if self.supportsTransactions == (not value):
+            return
+        if self.supportsTransactions:
+            self.adoConn.RollbackTrans() # Disables autocommit per DBPAI
+        else:
+            self.adoConn.IsolationLevel = defaultIsolationLevel
+            self.adoConn.BeginTrans() # Disables autocommit per DBPAI
+        self.supportsTransactions = not value
+
     def _raiseConnectionError(self, errorclass, errorvalue):
         eh = self.errorhandler
         if eh is None:
@@ -262,7 +283,7 @@ class Connection(object):
         self.messages = []
         try:
             self._close_connection()
-        except Exception, e:
+        except Exception as e:
             self._raiseConnectionError(InternalError, e)
         self.adoConn = None
         pythoncom.CoUninitialize()
@@ -284,14 +305,19 @@ class Connection(object):
                 #calling CommitTrans automatically starts a new transaction. Not all providers support this.
                 #If not, we will have to start a new transaction by this command:
                 self.adoConn.BeginTrans()
-        except Exception, e:
+        except Exception as e:
             self._raiseConnectionError(Error, e)
 
     def rollback(self):
         """Abort a pending transaction."""
         self.messages = []
-        if not self.supportsTransactions:
-            self._raiseConnectionError(NotSupportedError, None)
+        #if not self.supportsTransactions:
+        #    self._raiseConnectionError(NotSupportedError, None)
+        with self.cursor() as cursor:
+            cursor.execute("select @@TRANCOUNT")
+            trancount, = cursor.fetchone()
+        if trancount == 0:
+            return
 
         self.adoConn.RollbackTrans()
         if not(self.adoConn.Attributes & adXactAbortRetaining):
@@ -306,15 +332,15 @@ class Connection(object):
         return Cursor(self)
 
     def printADOerrors(self):
-        print 'ADO Errors (%i):' % self.adoConn.Errors.Count
+        six.print_('ADO Errors (%i):' % self.adoConn.Errors.Count)
         for e in self.adoConn.Errors:
-            print 'Description: %s' % e.Description
-            print 'Error: %s %s ' % (e.Number, adoErrors.get(e.Number, "unknown"))
+            six.print_('Description: %s' % e.Description)
+            six.print_('Error: %s %s ' % (e.Number, adoErrors.get(e.Number, "unknown")))
             if e.Number == ado_error_TIMEOUT:
-                print 'Timeout Error: Try using adodbpi.connect(constr,timeout=Nseconds)'
-            print 'Source: %s' % e.Source
-            print 'NativeError: %s' % e.NativeError
-            print 'SQL State: %s' % e.SQLState
+                six.print_('Timeout Error: Try using adodbpi.connect(constr,timeout=Nseconds)')
+            six.print_('Source: %s' % e.Source)
+            six.print_('NativeError: %s' % e.NativeError)
+            six.print_('SQL State: %s' % e.SQLState)
             
     def _suggest_error_class(self):
         """Introspect the current ADO Errors and determine an appropriate error class.
@@ -438,10 +464,10 @@ class Cursor(object):
             recordset = self.cmd.Execute()
             self.rowcount = recordset[1]
             self._description_from_recordset(recordset[0])
-        except Exception, e:
+        except Exception as e:
             _message = ""
-            if hasattr(e, 'args'): _message += str(e.args)+"\n"
-            _message += "Command:\n%s\nParameters:\n%s" %  (self.cmd.CommandText, format_parameters(self.cmd.Parameters, True))
+            if hasattr(e, 'args'): _message += str(e.args)
+            #_message += "Command:\n%s\nParameters:\n%s" %  (self.cmd.CommandText, format_parameters(self.cmd.Parameters, True))
             klass = self.connection._suggest_error_class()
             self._raiseCursorError(klass, _message)
 
@@ -606,7 +632,7 @@ class Cursor(object):
         """
         self.messages = list()
         if self.connection is None or self.rs is None:
-            self._raiseCursorError(Error, None)
+            #self._raiseCursorError(Error, None)
             return None
 
         recordset = self.rs.NextRecordset()[0]
@@ -696,7 +722,7 @@ _variantConversions = MultiMap(
         (adBoolean,): bool,
         adoLongTypes+adoRowIdTypes : long,
         adoIntegerTypes: int,
-        adoBinaryTypes: buffer, 
+        adoBinaryTypes: buffer,
     }, 
     lambda x: x)
 

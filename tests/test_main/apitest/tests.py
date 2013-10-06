@@ -1,9 +1,9 @@
 from decimal import Decimal
 
 # Base is used to get connection string using Django settings
-from sqlserver_ado import base
+from sqlserver.ado import base
 # Internal dbapi module
-from sqlserver_ado import dbapi
+from sqlserver.ado import dbapi
 
 # Base unit test
 import dbapi20
@@ -11,10 +11,10 @@ import dbapi20
 class test_dbapi(dbapi20.DatabaseAPI20Test):
     driver = dbapi
     connect_args = [ base.connection_string_from_settings() ]
-    
+
 #    def _connect(self):
 #        return connection
-    
+
     def _try_run(self, *args):
         con = self._connect()
         cur = None
@@ -32,7 +32,7 @@ class test_dbapi(dbapi20.DatabaseAPI20Test):
     def _try_run2(self, cur, *args):
         for arg in args:
             cur.execute(arg)
-    
+
     # This should create the "lower" sproc.
     def _callproc_setup(self, cur):
         self._try_run2(cur,
@@ -46,7 +46,7 @@ BEGIN
 END
 """,
             )
-    
+
     # This should create a sproc with a return value.
     def _retval_setup(self, cur):
         self._try_run2(cur,
@@ -67,7 +67,7 @@ END
             self._retval_setup(cur)
             values = cur.callproc('add_one',(1,))
             self.assertEqual(values[0], 1, 'input parameter should be left unchanged: %s' % (values[0],))
-            
+
             self.assertEqual(cur.description, None,"No resultset was expected.")
             self.assertEqual(cur.return_value, 2, "Invalid return value: %s" % (cur.return_value,))
 
@@ -97,12 +97,12 @@ END
             self.assertEqual(values[0], 1, 'input parameter should be unchanged')
             self.assertEqual(values[1], 2, 'output parameter should get new values')
         finally:
-            con.close()            
-    
+            con.close()
+
     # Don't need setoutputsize tests.
-    def test_setoutputsize(self): 
+    def test_setoutputsize(self):
         pass
-        
+
     def help_nextset_setUp(self,cur):
         self._try_run2(cur,
             """IF OBJECT_ID(N'[dbo].[more_than_one]', N'P') IS NOT NULL DROP PROCEDURE [dbo].[more_than_one]""",
@@ -118,10 +118,10 @@ end
 
     def help_nextset_tearDown(self,cur):
         pass
-        
+
     def test_ExceptionsAsConnectionAttributes(self):
         pass
-        
+
     def test_select_decimal_zero(self):
         con = self._connect()
         try:
@@ -129,10 +129,10 @@ end
                 Decimal('0.00'),
                 Decimal('0.0'),
                 Decimal('-0.00'))
-            
+
             cur = con.cursor()
             cur.execute("SELECT %s as A, %s as B, %s as C", expected)
-                
+
             result = cur.fetchall()
             self.assertEqual(result[0], expected)
         finally:

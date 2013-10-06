@@ -54,7 +54,7 @@ class NullTests(TestCase):
         for v in values:
             model(val=v).save()
             
-        self.assertEquals(len(list(model.objects.all())), len(values))
+        self.assertEqual(len(list(model.objects.all())), len(values))
 
     def testChar(self):
         self._run(TableNullChar, (None, "This is my string value."))

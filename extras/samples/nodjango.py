@@ -10,7 +10,7 @@ def _hack_backend_path():
 
 # Import the dbapi module, after hacking the import path.
 _hack_backend_path()
-import sqlserver_ado.dbapi as db
+import sqlserver.ado.dbapi as db
 
 def _print_names(results):
     for item in results:

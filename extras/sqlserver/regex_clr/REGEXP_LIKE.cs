@@ -15,6 +15,9 @@ public partial class UserDefinedFunctions
 		if (caseSensitive==0)
 			options |= RegexOptions.IgnoreCase;
 
+		if (input.IsNull || pattern.IsNull)
+		    return 0;
+
 		return Regex.IsMatch(input.Value, pattern.Value, options) ? 1 : 0;
 	}
 }
