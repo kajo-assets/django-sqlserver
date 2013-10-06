@@ -5,3 +5,5 @@ django_mssql.egg-info/
 .*\.orig
 \.tox/
 .*\.sublime.*
+env
+tests/local_settings.py

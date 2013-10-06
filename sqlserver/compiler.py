@@ -7,8 +7,8 @@ except ImportError:
 
 import django
 from django.db.models.sql import compiler
-import datetime
 import re
+from itertools import chain, repeat
 
 # query_class returns the base class to use for Django queries.
 # The custom 'SqlServerQuery' class derives from django.db.models.sql.query.Query
@@ -48,17 +48,21 @@ _re_data_type_terminator = re.compile(
 # Pattern used in column aliasing to find sub-select placeholders
 _re_col_placeholder = re.compile(r'\{_placeholder_(\d+)\}')
 
+
 def _break(s, find):
     """Break a string s into the part before the substring to find, 
     and the part including and after the substring."""
     i = s.find(find)
     return s[:i], s[i:]
 
+
 def _get_order_limit_offset(sql):
     return _re_order_limit_offset.search(sql).groups()
-    
+
+
 def _remove_order_limit_offset(sql):
-    return _re_order_limit_offset.sub('',sql).split(None, 1)[1]
+    return _re_order_limit_offset.sub('', sql).split(None, 1)[1]
+
 
 class SQLCompiler(compiler.SQLCompiler):
     def __pad_fields_with_aggregates(self, fields):
@@ -89,10 +93,9 @@ class SQLCompiler(compiler.SQLCompiler):
         for value, field in zip_longest(row[index_extra_select:], fields):
             # print '\tfield=%s\tvalue=%s' % (repr(field), repr(value))
             if field:
-                try:
-                    value = self.connection.ops.convert_values(value, field)
-                except ValueError:
-                    pass
+                internal_type = field.get_internal_type()
+                if internal_type in self.connection.ops._convert_values_map:
+                    value = self.connection.ops._convert_values_map[internal_type].to_python(value)
             values.append(value)
         return row[:index_extra_select] + tuple(values)
 
@@ -201,8 +204,7 @@ class SQLCompiler(compiler.SQLCompiler):
             else:
                 col = x
             f.append('{0}.{1}'.format(inner_table_name, col.strip()))
-        
-        
+
         # inject a subselect to get around OVER requiring ORDER BY to come from FROM
         inner_select = '{fields} FROM ( SELECT {inner} ) AS {inner_as}'.format(
             fields=', '.join(f),
@@ -295,12 +297,22 @@ class SQLCompiler(compiler.SQLCompiler):
         return ', '.join(outer), ', '.join(inner) + from_clause.format(**parens)
 
     def get_ordering(self):
-        # The ORDER BY clause is invalid in views, inline functions, 
-        # derived tables, subqueries, and common table expressions, 
+        # The ORDER BY clause is invalid in views, inline functions,
+        # derived tables, subqueries, and common table expressions,
         # unless TOP or FOR XML is also specified.
         if getattr(self.query, '_mssql_ordering_not_allowed', False):
-            return (None, None)
+            return (None, [], [])
         return super(SQLCompiler, self).get_ordering()
+
+    def get_ordering_old(self):
+        # Django 1.5 and earlier version
+        # The ORDER BY clause is invalid in views, inline functions,
+        # derived tables, subqueries, and common table expressions,
+        # unless TOP or FOR XML is also specified.
+        if getattr(self.query, '_mssql_ordering_not_allowed', False):
+            return (None, [])
+        return super(SQLCompiler, self).get_ordering()
+
 
 class SQLInsertCompiler(compiler.SQLInsertCompiler, SQLCompiler):
     # search for after table/column list
@@ -395,4 +407,10 @@ class SQLAggregateCompiler(compiler.SQLAggregateCompiler, SQLCompiler):
         return super(SQLAggregateCompiler, self).as_sql(qn=qn)
 
 class SQLDateCompiler(compiler.SQLDateCompiler, SQLCompiler):
+    pass
+
+try:
+    class SQLDateTimeCompiler(compiler.SQLDateTimeCompiler, SQLCompiler):
+        pass
+except AttributeError:
     pass
