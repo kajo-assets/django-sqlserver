@@ -313,8 +313,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         are the fields going to be inserted in the batch, the objs contains
         all the objects to be inserted.
         """
-        return min(len(objs), 1000)
-        
+        return min(len(objs), 2100 // len(fields), 1000)
+
     def convert_values(self, value, field):
         """
         MSSQL needs help with date fields that might come out as strings.
