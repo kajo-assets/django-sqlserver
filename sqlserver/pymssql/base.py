@@ -66,6 +66,8 @@ class DatabaseWrapper(SqlServerBaseWrapper):
             ver = cur.fetchone()[0]
             if not ver:
                 return VERSION_SQL2000
+            if isinstance(ver, bytes):
+                ver = ver.decode()
             return int(ver.split('.')[0])
         finally:
             cur.close()
