@@ -258,6 +258,15 @@ class SqlServerBaseWrapper(BaseDatabaseWrapper):
                 if cursor.description:
                     raise utils.IntegrityError(cursor.fetchall())
 
+    def is_usable(self):
+        try:
+            # Use a cursor directly, bypassing Django's utilities.
+            self.connection.cursor().execute("SELECT 1")
+        except pytz.Error:
+            return False
+        else:
+            return True
+
     def _savepoint_commit(self, sid):
         pass
 
