@@ -38,6 +38,7 @@ class DatabaseWrapper(SqlServerBaseWrapper):
             host=settings_dict['HOST'],
             database=settings_dict['NAME'],
             user=settings_dict['USER'],
+            port=settings_dict.get('PORT', '1433'),
             password=settings_dict['PASSWORD'],
             timeout=self.command_timeout,
             charset='utf8',
